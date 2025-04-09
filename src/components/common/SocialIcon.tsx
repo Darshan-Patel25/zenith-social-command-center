@@ -8,7 +8,8 @@ import {
   Youtube,
   Send,
   MessageCircle,
-  CircleDot
+  CircleDot,
+  Plus
 } from 'lucide-react';
 import { SocialPlatform } from '@/types';
 
@@ -67,7 +68,7 @@ const SocialIcon: React.FC<SocialIconProps> = ({
         </svg>
       );
     default:
-      return null;
+      return <Plus {...iconProps} />;
   }
 };
 

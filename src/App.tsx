@@ -13,6 +13,7 @@ import Analytics from "@/pages/Analytics";
 import Engagement from "@/pages/Engagement";
 import TelegramBot from "@/pages/TelegramBot";
 import Profile from "@/pages/Profile";
+import Account from "@/pages/Account";
 import Settings from "@/pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/engagement" element={<Layout><Engagement /></Layout>} />
           <Route path="/telegram-bot" element={<Layout><TelegramBot /></Layout>} />
           <Route path="/profile" element={<Layout><Profile /></Layout>} />
+          <Route path="/account" element={<Layout><Account /></Layout>} />
           <Route path="/settings" element={<Layout><Settings /></Layout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
