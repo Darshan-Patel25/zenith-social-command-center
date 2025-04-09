@@ -7,8 +7,8 @@ import {
   Instagram, 
   Youtube,
   Send,
-  Pinterest,
-  MessageCircle
+  MessageCircle,
+  CircleDot
 } from 'lucide-react';
 import { SocialPlatform } from '@/types';
 
@@ -45,7 +45,7 @@ const SocialIcon: React.FC<SocialIconProps> = ({
     case 'telegram':
       return <Send {...iconProps} className={`${iconProps.className} text-blue-500`} />;
     case 'pinterest':
-      return <Pinterest {...iconProps} className={`${iconProps.className} text-red-500`} />;
+      return <CircleDot {...iconProps} className={`${iconProps.className} text-red-500`} />;
     case 'tumblr':
       return <MessageCircle {...iconProps} className={`${iconProps.className} text-blue-800`} />;
     case 'tiktok':

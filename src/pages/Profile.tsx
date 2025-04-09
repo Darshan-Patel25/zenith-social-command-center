@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Bell, CreditCard, Store, Graduation, UserCog, Users, Send, Contact } from 'lucide-react';
+import { User, Bell, CreditCard, Store, GraduationCap, UserCog, Users, Send, Contact, Check } from 'lucide-react';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
 
@@ -81,7 +80,7 @@ const Profile: React.FC = () => {
               value="university" 
               className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-md data-[state=active]:border-primary"
             >
-              <Graduation className="w-4 h-4" />
+              <GraduationCap className="w-4 h-4" />
               <span>SocialBee University</span>
             </TabsTrigger>
           </div>
@@ -521,7 +520,7 @@ const Profile: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="text-center py-12">
-                <Graduation className="h-16 w-16 mx-auto text-muted-foreground" />
+                <GraduationCap className="h-16 w-16 mx-auto text-muted-foreground" />
                 <h3 className="text-xl font-medium mt-4">Learning Portal Coming Soon</h3>
                 <p className="text-muted-foreground mt-2">
                   We're preparing comprehensive courses and resources to help you master social media marketing.

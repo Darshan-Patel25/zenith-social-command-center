@@ -11,8 +11,16 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle, Eye, Pencil, Trash, FileText, Import, Rss, FileArchive, Archive, BrowserIcon, ThumbsUp } from 'lucide-react';
+import { PlusCircle, Eye, Pencil, Trash, FileText, Import, Rss, FileArchive, Archive, Rows, ThumbsUp } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 // Sample content categories data
 const contentCategories = [
