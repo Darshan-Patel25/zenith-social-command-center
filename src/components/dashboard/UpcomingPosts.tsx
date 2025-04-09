@@ -23,7 +23,7 @@ const upcomingPosts = [
   },
   {
     id: '3',
-    content: 'Watch our CEO's interview on the future of digital marketing. #digitalmarketing #interview',
+    content: 'Watch our CEO\'s interview on the future of digital marketing. #digitalmarketing #interview',
     scheduledDate: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 hours from now
     platforms: ['linkedin', 'twitter'] as SocialPlatform[],
   },
