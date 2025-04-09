@@ -1,0 +1,255 @@
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Check, MessageSquare, ThumbsUp, Share2, Search, Filter, ChevronDown } from 'lucide-react';
+import SocialIcon from '@/components/common/SocialIcon';
+import { SocialPlatform } from '@/types';
+
+// Sample engagement data
+const generateEngagementData = (count = 15) => {
+  const platforms: SocialPlatform[] = ['facebook', 'twitter', 'linkedin', 'instagram'];
+  const types = ['comment', 'like', 'share', 'mention'];
+  const data = [];
+  
+  for (let i = 0; i < count; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - Math.floor(Math.random() * 7));
+    date.setHours(date.getHours() - Math.floor(Math.random() * 24));
+    
+    const platform = platforms[Math.floor(Math.random() * platforms.length)];
+    const type = types[Math.floor(Math.random() * types.length)];
+    
+    let content = '';
+    let username = `user${Math.floor(Math.random() * 1000)}`;
+    
+    if (type === 'comment') {
+      content = 'Great content! I really enjoyed reading this post.';
+    } else if (type === 'mention') {
+      content = `Hey @yourcompany, check out this article about #marketing!`;
+    }
+    
+    data.push({
+      id: `engagement-${i}`,
+      type,
+      content,
+      username,
+      platform,
+      date,
+      handled: Math.random() > 0.5,
+    });
+  }
+  
+  return data;
+};
+
+const engagementData = generateEngagementData();
+
+const Engagement: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Filter data based on active tab and search query
+  const filteredData = engagementData.filter((item) => {
+    if (activeTab === 'all' || item.type === activeTab) {
+      if (!searchQuery) return true;
+      
+      const query = searchQuery.toLowerCase();
+      return (
+        item.content.toLowerCase().includes(query) ||
+        item.username.toLowerCase().includes(query) ||
+        item.platform.toLowerCase().includes(query)
+      );
+    }
+    return false;
+  });
+  
+  // Get icon based on engagement type
+  const getEngagementIcon = (type: string) => {
+    switch (type) {
+      case 'comment':
+        return <MessageSquare className="h-4 w-4" />;
+      case 'like':
+        return <ThumbsUp className="h-4 w-4" />;
+      case 'share':
+        return <Share2 className="h-4 w-4" />;
+      case 'mention':
+        return <MessageSquare className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Engagement</h1>
+          <p className="text-muted-foreground">Manage all interactions with your social media posts</p>
+        </div>
+      </div>
+      
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Comments, Likes, Shares & Mentions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search engagements..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Select defaultValue="recent">
+                <SelectTrigger className="w-full sm:w-[150px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most Recent</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button variant="outline" className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <span>Filter</span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="all" className="flex gap-2">
+                All
+                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {engagementData.length}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="comment" className="flex gap-2">
+                Comments
+                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {engagementData.filter(item => item.type === 'comment').length}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="like" className="flex gap-2">
+                Likes
+                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {engagementData.filter(item => item.type === 'like').length}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="share" className="flex gap-2">
+                Shares
+                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {engagementData.filter(item => item.type === 'share').length}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="mention" className="flex gap-2">
+                Mentions
+                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {engagementData.filter(item => item.type === 'mention').length}
+                </span>
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value={activeTab} className="space-y-4">
+              {filteredData.length > 0 ? (
+                filteredData.map((item) => (
+                  <div
+                    key={item.id}
+                    className="border rounded-lg p-4 flex flex-col sm:flex-row gap-4"
+                  >
+                    <div className="sm:w-14 flex sm:flex-col items-center sm:items-start gap-2">
+                      <div className="p-2 bg-gray-100 rounded-full">
+                        {getEngagementIcon(item.type)}
+                      </div>
+                      <SocialIcon platform={item.platform} size={18} />
+                    </div>
+                    
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center">
+                            <span className="font-medium">{item.username}</span>
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              {formatDate(item.date)}
+                            </span>
+                          </div>
+                          <p className="text-sm mt-1">
+                            {item.content || `${capitalizeFirstLetter(item.type)}d your post`}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className={item.handled ? "text-green-600 border-green-600" : ""}
+                          >
+                            {item.handled ? (
+                              <>
+                                <Check className="mr-1 h-4 w-4" />
+                                Handled
+                              </>
+                            ) : (
+                              "Mark as Handled"
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {item.type === 'comment' && (
+                        <div className="mt-3">
+                          <Input placeholder="Write a reply..." className="text-sm" />
+                          <div className="flex justify-end mt-2">
+                            <Button size="sm">Reply</Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No engagements found</p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+// Helper functions
+const formatDate = (date: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffMins < 60) {
+    return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  } else {
+    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+  }
+};
+
+const capitalizeFirstLetter = (string: string): string => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+export default Engagement;
