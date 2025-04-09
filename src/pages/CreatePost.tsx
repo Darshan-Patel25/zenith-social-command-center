@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,7 +27,8 @@ import {
   Plus,
   Clock,
   Edit,
-  Eye
+  Eye,
+  Search
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -193,93 +195,95 @@ const CreatePost: React.FC = () => {
                     <TabsTrigger value="comments" className="flex-1">Comments</TabsTrigger>
                     <TabsTrigger value="accounts" className="flex-1">Accounts</TabsTrigger>
                   </TabsList>
-                </Tabs>
-              </div>
-              
-              <TabsContent value="preview" className="flex-grow">
-                {postContent ? (
-                  <div className="border rounded-lg m-4 p-4">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span className="text-blue-600 font-semibold">U</span>
-                      </div>
-                      <div>
-                        <p className="font-medium">User Name</p>
-                        <p className="text-xs text-gray-500">Just now</p>
-                      </div>
-                    </div>
-                    <p className="text-sm mb-3">{postContent}</p>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500 flex flex-col items-center justify-center h-full">
-                    <PenLine className="w-12 h-12 mb-3 opacity-20" />
-                    <p>Start typing to see a preview</p>
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="comments" className="flex-grow p-4">
-                <div className="text-center py-8 text-gray-500">
-                  <p>No comments configuration available</p>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="accounts" className="flex-grow overflow-auto">
-                <div className="p-4">
-                  <div className="mb-4">
-                    <h3 className="font-medium mb-2">Group</h3>
-                    <div className="flex justify-between items-center mb-4">
-                      <Input 
-                        className="max-w-[240px]" 
-                        placeholder="Search an account"
-                        startDecorator={<svg className="w-4 h-4" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 6.5C10 8.433 8.433 10 6.5 10C4.567 10 3 8.433 3 6.5C3 4.567 4.567 3 6.5 3C8.433 3 10 4.567 10 6.5ZM9.30884 10.0159C8.53901 10.6318 7.56251 11 6.5 11C4.01472 11 2 8.98528 2 6.5C2 4.01472 4.01472 2 6.5 2C8.98528 2 11 4.01472 11 6.5C11 7.56251 10.6318 8.53901 10.0159 9.30884L12.8536 12.1464C13.0488 12.3417 13.0488 12.6583 12.8536 12.8536C12.6583 13.0488 12.3417 13.0488 12.1464 12.8536L9.30884 10.0159Z" fill="currentColor"></path></svg>}
-                      />
-                      <Button variant="ghost" size="icon">
-                        <Filter className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Checkbox id="select-all" />
-                          <Label htmlFor="select-all">1 Account selected.</Label>
+                
+                  <TabsContent value="preview" className="flex-grow p-4">
+                    {postContent ? (
+                      <div className="border rounded-lg m-4 p-4">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span className="text-blue-600 font-semibold">U</span>
+                          </div>
+                          <div>
+                            <p className="font-medium">User Name</p>
+                            <p className="text-xs text-gray-500">Just now</p>
+                          </div>
                         </div>
-                        <Button variant="link" className="text-blue-500 h-auto p-0">
-                          Clear All
-                        </Button>
+                        <p className="text-sm mb-3">{postContent}</p>
                       </div>
-                      
-                      <div className="flex items-center border p-2 rounded-md justify-between bg-gray-50">
-                        <div className="flex items-center gap-2">
-                          <Checkbox id="linkedin-account" checked />
-                          <div className="flex items-center gap-1">
-                            <div className="bg-blue-600 text-white rounded p-1 flex items-center justify-center h-6 w-6">
-                              in
+                    ) : (
+                      <div className="text-center py-8 text-gray-500 flex flex-col items-center justify-center h-full">
+                        <PenLine className="w-12 h-12 mb-3 opacity-20" />
+                        <p>Start typing to see a preview</p>
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="comments" className="flex-grow p-4">
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No comments configuration available</p>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="accounts" className="flex-grow overflow-auto">
+                    <div className="p-4">
+                      <div className="mb-4">
+                        <h3 className="font-medium mb-2">Group</h3>
+                        <div className="flex justify-between items-center mb-4">
+                          <div className="relative max-w-[240px] w-full">
+                            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input 
+                              className="pl-8 max-w-[240px]" 
+                              placeholder="Search an account"
+                            />
+                          </div>
+                          <Button variant="ghost" size="icon">
+                            <Filter className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Checkbox id="select-all" />
+                              <Label htmlFor="select-all">1 Account selected.</Label>
                             </div>
-                            <Label htmlFor="linkedin-account">Darshan</Label>
+                            <Button variant="link" className="text-blue-500 h-auto p-0">
+                              Clear All
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center border p-2 rounded-md justify-between bg-gray-50">
+                            <div className="flex items-center gap-2">
+                              <Checkbox id="linkedin-account" checked />
+                              <div className="flex items-center gap-1">
+                                <div className="bg-blue-600 text-white rounded p-1 flex items-center justify-center h-6 w-6">
+                                  in
+                                </div>
+                                <Label htmlFor="linkedin-account">Darshan</Label>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-8">
-                    <div className="flex items-center justify-center flex-col gap-2">
-                      <div className="w-full max-w-[240px]">
-                        <img src="/lovable-uploads/dfc9e41d-494b-4d37-97d8-ec2f91b236a4.png" alt="Empty state" className="w-full" />
+                      
+                      <div className="mt-8">
+                        <div className="flex items-center justify-center flex-col gap-2">
+                          <div className="w-full max-w-[240px]">
+                            <img src="/lovable-uploads/dfc9e41d-494b-4d37-97d8-ec2f91b236a4.png" alt="Empty state" className="w-full" />
+                          </div>
+                          <p className="text-center text-gray-500">You have not created any groups yet</p>
+                          <p className="text-center text-sm text-gray-400 max-w-[300px]">
+                            You can sort your social media accounts in a Group. Use it for quick selection, filtering and more.
+                          </p>
+                          <Button className="mt-2">
+                            <Plus className="h-4 w-4 mr-1" /> Create Group
+                          </Button>
+                        </div>
                       </div>
-                      <p className="text-center text-gray-500">You have not created any groups yet</p>
-                      <p className="text-center text-sm text-gray-400 max-w-[300px]">
-                        You can sort your social media accounts in a Group. Use it for quick selection, filtering and more.
-                      </p>
-                      <Button className="mt-2">
-                        <Plus className="h-4 w-4 mr-1" /> Create Group
-                      </Button>
                     </div>
-                  </div>
-                </div>
-              </TabsContent>
+                  </TabsContent>
+                </Tabs>
+              </div>
             </CardContent>
           </Card>
         </div>
