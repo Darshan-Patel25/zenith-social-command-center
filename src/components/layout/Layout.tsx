@@ -49,7 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex h-screen bg-gray-50">
       <SideNav />
       
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'lg:ml-52' : 'lg:ml-16'} ml-16`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'lg:ml-52' : 'ml-16'}`}>
         <Header title={getTitle()} />
         
         <main className="flex-1 overflow-auto p-6">
