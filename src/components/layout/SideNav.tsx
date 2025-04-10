@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -100,31 +99,21 @@ const SideNav = () => {
       isOpen ? "w-52" : "w-16"
     )}>
       <div className="p-4 flex items-center justify-between mb-6">
-        <div className="flex items-center">
+        <div className="flex items-center relative w-full">
+          <Link to="/" className="flex items-center">
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold">Z</span>
+            </div>
+            {isOpen && <h1 className="ml-2 text-xl font-bold text-white">Zenith</h1>}
+          </Link>
           <Button 
             variant="ghost" 
             size="icon"
-            className="text-slate-300 hover:text-white p-0 h-8 w-8 mr-2"
+            className="text-slate-300 hover:text-white p-0 h-8 w-8 absolute right-0"
             onClick={toggleSidebar}
           >
             <Menu className="h-5 w-5" />
           </Button>
-          
-          {isOpen && (
-            <Link to="/" className="flex items-center">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">Z</span>
-              </div>
-              <h1 className="ml-2 text-xl font-bold text-white">Zenith</h1>
-            </Link>
-          )}
-          {!isOpen && (
-            <Link to="/" className="flex items-center">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">Z</span>
-              </div>
-            </Link>
-          )}
         </div>
       </div>
       
