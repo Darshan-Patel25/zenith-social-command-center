@@ -112,7 +112,7 @@ const SideNav = () => {
             className="text-slate-300 hover:text-white p-0 h-8 w-8 absolute right-0"
             onClick={toggleSidebar}
           >
-            <Menu className="h-5 w-5" />
+            {isOpen ? <Menu className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           </Button>
         </div>
       </div>
