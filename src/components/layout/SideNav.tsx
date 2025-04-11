@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -12,7 +11,8 @@ import {
   Send,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  Link2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,6 @@ const SideNav = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
   
-  // Check window width on mount and resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -31,13 +30,10 @@ const SideNav = () => {
       }
     };
     
-    // Set initial state
     handleResize();
     
-    // Add event listener
     window.addEventListener('resize', handleResize);
     
-    // Cleanup
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
@@ -75,6 +71,11 @@ const SideNav = () => {
       icon: <MessageCircle className="w-5 h-5" />,
       label: 'Engagement',
       path: '/engagement',
+    },
+    {
+      icon: <Link2 className="w-5 h-5" />,
+      label: 'Accounts',
+      path: '/accounts',
     },
     {
       icon: <UserCircle className="w-5 h-5" />,

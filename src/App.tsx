@@ -15,6 +15,7 @@ import Profile from "@/pages/Profile";
 import Account from "@/pages/Account";
 import Settings from "@/pages/Settings";
 import NotFound from "./pages/NotFound";
+import Accounts from "@/pages/Accounts";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/profile" element={<Layout><Profile /></Layout>} />
           <Route path="/account" element={<Layout><Account /></Layout>} />
           <Route path="/settings" element={<Layout><Settings /></Layout>} />
+          <Route path="/accounts" element={<Layout><Accounts /></Layout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
