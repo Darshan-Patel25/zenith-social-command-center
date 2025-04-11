@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -6,7 +7,6 @@ import {
   Calendar, 
   BarChart3, 
   MessageCircle, 
-  Bot, 
   UserCircle, 
   Settings,
   Send,
@@ -75,11 +75,6 @@ const SideNav = () => {
       icon: <MessageCircle className="w-5 h-5" />,
       label: 'Engagement',
       path: '/engagement',
-    },
-    {
-      icon: <Bot className="w-5 h-5" />,
-      label: 'Telegram Bot',
-      path: '/telegram-bot',
     },
     {
       icon: <UserCircle className="w-5 h-5" />,

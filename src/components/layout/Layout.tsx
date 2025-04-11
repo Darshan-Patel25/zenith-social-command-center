@@ -38,7 +38,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (path === '/schedule') return 'Schedule Posts';
     if (path === '/analytics') return 'Analytics';
     if (path === '/engagement') return 'Engagement';
-    if (path === '/telegram-bot') return 'Telegram Bot';
     if (path === '/profile') return 'My Profile';
     if (path === '/settings') return 'Settings';
     
