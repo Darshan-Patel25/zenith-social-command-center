@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { SocialPlatform } from '@/types/social';
+import { SocialPlatform } from '@/types';
 import SocialIcon from '@/components/common/SocialIcon';
 
 interface ReportsDrawerProps {
