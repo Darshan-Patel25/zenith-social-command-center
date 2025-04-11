@@ -17,7 +17,10 @@ export type SocialPlatform =
   | 'telegram'
   | 'pinterest'
   | 'youtube'
-  | 'tumblr';
+  | 'tumblr'
+  | 'threads'
+  | 'bluesky'
+  | 'google';
 
 export interface Post {
   id: string;

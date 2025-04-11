@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { SocialPlatform } from '@/types';
+import { SocialPlatform } from '@/types/social';
 import SocialIcon from '@/components/common/SocialIcon';
 
 interface ReportsDrawerProps {
@@ -33,8 +33,7 @@ const ReportsDrawer: React.FC<ReportsDrawerProps> = ({
     { id: 'twitter', name: 'Twitter' },
     { id: 'youtube', name: 'YouTube', isNew: true },
     { id: 'tiktok', name: 'TikTok', isNew: true },
-    // Remove 'google' as it's not in the SocialPlatform type
-    // { id: 'google', name: 'Google Business Profile' },
+    { id: 'google', name: 'Google Business Profile' },
   ];
 
   return (

@@ -12,7 +12,7 @@ import {
   Plus,
   Briefcase
 } from 'lucide-react';
-import { SocialPlatform } from '@/types';
+import { SocialPlatform } from '@/types/social';
 
 interface SocialIconProps {
   platform: SocialPlatform;

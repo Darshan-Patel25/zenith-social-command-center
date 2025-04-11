@@ -10,4 +10,5 @@ export type SocialPlatform =
   | 'tumblr'
   | 'threads'
   | 'bluesky'
-  | 'google';
+  | 'google'
+  | 'telegram';

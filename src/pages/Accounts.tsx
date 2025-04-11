@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, Plus, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { SocialPlatform } from '@/types';
+import { SocialPlatform } from '@/types/social';
 import SocialIcon from '@/components/common/SocialIcon';
 import { toast } from '@/components/ui/use-toast';
 
@@ -22,6 +22,7 @@ interface AccountCardProps {
   canConnectBoard?: boolean;
   canConnectChannel?: boolean;
   canConnectPersonal?: boolean;
+  canConnectProfile?: boolean;
 }
 
 const AccountCard: React.FC<AccountCardProps> = ({
@@ -36,7 +37,8 @@ const AccountCard: React.FC<AccountCardProps> = ({
   canConnectBlog = false,
   canConnectBoard = false,
   canConnectChannel = false,
-  canConnectPersonal = false
+  canConnectPersonal = false,
+  canConnectProfile = false
 }) => {
   const handleConnect = (type: string) => {
     toast({
