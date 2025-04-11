@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Select, 
@@ -14,7 +13,16 @@ import MetricCard from '@/components/analytics/MetricCard';
 import AnalyticsChart from '@/components/analytics/AnalyticsChart';
 import EngagementTable from '@/components/analytics/EngagementTable';
 import PostPerformance from '@/components/analytics/PostPerformance';
-import { ChevronDown, Edit, Share } from 'lucide-react';
+import { 
+  ChevronDown, 
+  Edit, 
+  Share, 
+  BarChart3, 
+  LineChart, 
+  Lightbulb, 
+  ClipboardList, 
+  Download 
+} from 'lucide-react';
 
 // Sample data for the charts
 const generateDates = (days = 30) => {
@@ -70,6 +78,7 @@ const platformOptions: SocialPlatform[] = ['linkedin', 'facebook', 'twitter', 'i
 const Analytics: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] = useState<SocialPlatform>('linkedin');
   const [dateRange, setDateRange] = useState('30');
+  const [activeTab, setActiveTab] = useState('page');
   
   // Get platform data based on selection
   const platformData = generatePlatformData(selectedPlatform);
@@ -90,18 +99,28 @@ const Analytics: React.FC = () => {
   return (
     <>
       <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Analytics</h1>
+          <p className="text-gray-500 mt-1">See here how your social profile has been performing and growing.</p>
+        </div>
+        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold">{getPlatformDisplayName(selectedPlatform)} Analytics</h1>
-            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <div className="flex gap-2 w-full md:w-auto">
+          <div className="flex gap-2 w-full">
+            <Select value={dateRange} onValueChange={setDateRange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Last 30 days" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">Last 7 days</SelectItem>
+                <SelectItem value="14">Last 14 days</SelectItem>
+                <SelectItem value="30">Last 30 days</SelectItem>
+                <SelectItem value="90">Last 90 days</SelectItem>
+              </SelectContent>
+            </Select>
+            
             <Select value={selectedPlatform} onValueChange={(value) => setSelectedPlatform(value as SocialPlatform)}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Select Platform" />
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="All Profiles" />
               </SelectTrigger>
               <SelectContent>
                 {platformOptions.map(platform => (
@@ -114,33 +133,56 @@ const Analytics: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
-            
-            <Select value={dateRange} onValueChange={setDateRange}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Last 30 days" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">Last 7 days</SelectItem>
-                <SelectItem value="14">Last 14 days</SelectItem>
-                <SelectItem value="30">Last 30 days</SelectItem>
-                <SelectItem value="90">Last 90 days</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <div className="flex">
-              <Button variant="outline" className="rounded-r-none flex gap-2">
-                <Edit className="h-4 w-4" />
-                <span>Edit</span>
-              </Button>
-              <Button className="rounded-l-none bg-blue-600 hover:bg-blue-700 flex gap-2">
-                <Share className="h-4 w-4" />
-                <span>Share</span>
-              </Button>
-            </div>
           </div>
         </div>
         
-        <div className="text-sm flex flex-wrap justify-between items-center gap-2">
+        <div className="bg-gray-50 flex flex-wrap rounded-md">
+          <Button 
+            variant={activeTab === 'page' ? 'default' : 'ghost'} 
+            className="gap-2 rounded-none rounded-l-md"
+            onClick={() => setActiveTab('page')}
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Page Analytics</span>
+          </Button>
+          
+          <Button 
+            variant={activeTab === 'post' ? 'default' : 'ghost'}
+            className="gap-2 rounded-none"
+            onClick={() => setActiveTab('post')}
+          >
+            <LineChart className="h-4 w-4" />
+            <span>Post Analytics</span>
+          </Button>
+          
+          <Button 
+            variant={activeTab === 'insights' ? 'default' : 'ghost'}
+            className="gap-2 rounded-none"
+            onClick={() => setActiveTab('insights')}
+          >
+            <Lightbulb className="h-4 w-4" />
+            <span>Insights</span>
+          </Button>
+          
+          <Button 
+            variant={activeTab === 'history' ? 'default' : 'ghost'}
+            className="gap-2 rounded-none"
+            onClick={() => setActiveTab('history')}
+          >
+            <ClipboardList className="h-4 w-4" />
+            <span>Post History</span>
+          </Button>
+          
+          <Button 
+            variant="ghost"
+            className="gap-2 rounded-none rounded-r-md ml-auto"
+          >
+            <Download className="h-4 w-4" />
+            <span>Export</span>
+          </Button>
+        </div>
+        
+        <div className="text-sm flex flex-wrap justify-between items-center gap-2 border-t pt-4">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-blue-600 flex items-center justify-center rounded-sm">
               <SocialIcon platform={selectedPlatform} size={20} className="text-white" />
@@ -154,7 +196,7 @@ const Analytics: React.FC = () => {
           </div>
         </div>
         
-        <div className="border-t pt-6 mt-4">
+        <div className="pt-6 mt-4">
           <h2 className="text-2xl font-bold mb-6">{getPlatformDisplayName(selectedPlatform)} Profile - Darshan</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
@@ -184,41 +226,57 @@ const Analytics: React.FC = () => {
           </div>
           
           <div className="space-y-6 mt-8">
-            <AnalyticsChart 
-              title="Publishing Trend" 
-              description="Review publishing patterns of your post types over time"
-              data={platformData.publishingTrend}
-              type="line"
-              lines={[
-                { dataKey: 'Text', color: '#4f46e5', name: 'Text' },
-                { dataKey: 'Image', color: '#ec4899', name: 'Image' },
-                { dataKey: 'Video', color: '#10b981', name: 'Video' },
-                { dataKey: 'Article', color: '#f59e0b', name: 'Article' },
-                { dataKey: 'Document', color: '#ef4444', name: 'Document' },
-                { dataKey: 'Others', color: '#6b7280', name: 'Others' }
-              ]}
-            />
+            {/* We're showing the analytics content based on the active tab */}
+            {activeTab === 'page' && (
+              <>
+                <AnalyticsChart 
+                  title="Publishing Trend" 
+                  description="Review publishing patterns of your post types over time"
+                  data={platformData.publishingTrend}
+                  type="line"
+                  lines={[
+                    { dataKey: 'Text', color: '#4f46e5', name: 'Text' },
+                    { dataKey: 'Image', color: '#ec4899', name: 'Image' },
+                    { dataKey: 'Video', color: '#10b981', name: 'Video' },
+                    { dataKey: 'Article', color: '#f59e0b', name: 'Article' },
+                    { dataKey: 'Document', color: '#ef4444', name: 'Document' },
+                    { dataKey: 'Others', color: '#6b7280', name: 'Others' }
+                  ]}
+                />
+                
+                <AnalyticsChart 
+                  title="Engagement Trend" 
+                  description="Measure engagement patterns through likes and comments over time"
+                  data={platformData.engagementTrend}
+                  type="line"
+                  lines={[
+                    { dataKey: 'Reactions', color: '#4f46e5', name: 'Reactions' },
+                    { dataKey: 'Comments', color: '#ec4899', name: 'Comments' }
+                  ]}
+                />
+              </>
+            )}
             
-            <AnalyticsChart 
-              title="Engagement Trend" 
-              description="Measure engagement patterns through likes and comments over time"
-              data={platformData.engagementTrend}
-              type="line"
-              lines={[
-                { dataKey: 'Reactions', color: '#4f46e5', name: 'Reactions' },
-                { dataKey: 'Comments', color: '#ec4899', name: 'Comments' }
-              ]}
-            />
+            {activeTab === 'post' && (
+              <EngagementTable 
+                title="Median and Total Engagement"
+                description="Compare median and total engagement performance across different content types"
+              />
+            )}
             
-            <EngagementTable 
-              title="Median and Total Engagement"
-              description="Compare median and total engagement performance across different content types"
-            />
+            {activeTab === 'insights' && (
+              <div className="p-8 text-center border rounded-lg">
+                <h3 className="text-xl font-bold">Insights Coming Soon</h3>
+                <p className="text-gray-500 mt-2">We're working on advanced insights for your content.</p>
+              </div>
+            )}
             
-            <PostPerformance
-              title="Post Performance"
-              description="Analyze individual post performance through likes and comments"
-            />
+            {activeTab === 'history' && (
+              <PostPerformance
+                title="Post Performance"
+                description="Analyze individual post performance through likes and comments"
+              />
+            )}
           </div>
         </div>
       </div>
