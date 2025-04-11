@@ -33,7 +33,8 @@ const ReportsDrawer: React.FC<ReportsDrawerProps> = ({
     { id: 'twitter', name: 'Twitter' },
     { id: 'youtube', name: 'YouTube', isNew: true },
     { id: 'tiktok', name: 'TikTok', isNew: true },
-    { id: 'google', name: 'Google Business Profile' },
+    // Remove 'google' as it's not in the SocialPlatform type
+    // { id: 'google', name: 'Google Business Profile' },
   ];
 
   return (
