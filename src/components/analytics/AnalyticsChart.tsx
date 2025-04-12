@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend, BarChart, Bar } from 'recharts';
 
 interface ChartDataPoint {
-  date: string;
   [key: string]: string | number;
 }
 
@@ -14,6 +13,7 @@ interface AnalyticsChartProps {
   data: ChartDataPoint[];
   type?: 'line' | 'bar';
   yAxisLabel?: string;
+  xAxisDataKey?: string;
   lines?: {
     dataKey: string;
     color: string;
@@ -27,6 +27,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
   data, 
   type = 'line',
   yAxisLabel,
+  xAxisDataKey = 'date',
   lines = [{ dataKey: 'value', color: '#2563eb' }]
 }) => {
   const renderLineChart = () => (
@@ -37,7 +38,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
       >
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
         <XAxis 
-          dataKey="date" 
+          dataKey={xAxisDataKey} 
           tick={{ fontSize: 12 }} 
           axisLine={{ stroke: '#e5e7eb' }} 
           tickLine={false}
@@ -76,7 +77,7 @@ const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
       >
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
         <XAxis 
-          dataKey="date" 
+          dataKey={xAxisDataKey} 
           tick={{ fontSize: 12 }} 
           axisLine={{ stroke: '#e5e7eb' }} 
           tickLine={false}

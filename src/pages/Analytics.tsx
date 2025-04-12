@@ -83,7 +83,14 @@ const generatePlatformData = (platform: SocialPlatform | 'all') => {
       likes: Math.floor(Math.random() * 100 * baseFactor),
       comments: Math.floor(Math.random() * 20 * baseFactor),
       shares: Math.floor(Math.random() * 15 * baseFactor),
-    }))
+    })),
+    postPerformanceByType: [
+      { type: 'Text', date: 'Type', engagement: Math.floor(Math.random() * 50) + 10, reach: Math.floor(Math.random() * 500) + 100 },
+      { type: 'Image', date: 'Type', engagement: Math.floor(Math.random() * 80) + 30, reach: Math.floor(Math.random() * 800) + 300 },
+      { type: 'Video', date: 'Type', engagement: Math.floor(Math.random() * 100) + 50, reach: Math.floor(Math.random() * 1000) + 500 },
+      { type: 'Article', date: 'Type', engagement: Math.floor(Math.random() * 60) + 20, reach: Math.floor(Math.random() * 600) + 200 },
+      { type: 'Document', date: 'Type', engagement: Math.floor(Math.random() * 40) + 10, reach: Math.floor(Math.random() * 400) + 100 },
+    ]
   };
 };
 
@@ -277,14 +284,9 @@ const Analytics: React.FC = () => {
               <AnalyticsChart 
                 title="Post Performance by Type" 
                 description="Compare engagement across different post types"
-                data={[
-                  { type: 'Text', engagement: Math.floor(Math.random() * 50) + 10, reach: Math.floor(Math.random() * 500) + 100 },
-                  { type: 'Image', engagement: Math.floor(Math.random() * 80) + 30, reach: Math.floor(Math.random() * 800) + 300 },
-                  { type: 'Video', engagement: Math.floor(Math.random() * 100) + 50, reach: Math.floor(Math.random() * 1000) + 500 },
-                  { type: 'Article', engagement: Math.floor(Math.random() * 60) + 20, reach: Math.floor(Math.random() * 600) + 200 },
-                  { type: 'Document', engagement: Math.floor(Math.random() * 40) + 10, reach: Math.floor(Math.random() * 400) + 100 },
-                ]}
+                data={platformData.postPerformanceByType}
                 type="bar"
+                xAxisDataKey="type"
                 lines={[
                   { dataKey: 'engagement', color: '#4f46e5', name: 'Engagement' },
                   { dataKey: 'reach', color: '#10b981', name: 'Reach' }
