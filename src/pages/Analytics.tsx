@@ -8,13 +8,20 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from '@/components/ui/tabs';
+import { Card } from "@/components/ui/card";
 import { SocialPlatform } from '@/types';
 import SocialIcon from '@/components/common/SocialIcon';
 import MetricCard from '@/components/analytics/MetricCard';
 import AnalyticsChart from '@/components/analytics/AnalyticsChart';
 import EngagementTable from '@/components/analytics/EngagementTable';
 import PostPerformance from '@/components/analytics/PostPerformance';
-import { ChevronDown, Edit, Share } from 'lucide-react';
+import { ChevronDown, Edit, Share, FileBarChart, BarChart3, Lightbulb } from 'lucide-react';
 
 // Sample data for the charts
 const generateDates = (days = 30) => {
@@ -61,7 +68,22 @@ const generatePlatformData = (platform: SocialPlatform | 'all') => {
       comments: Math.floor(Math.random() * 200 * baseFactor) + 20,
       reactions: Math.floor(Math.random() * 500 * baseFactor) + 50,
       engagement: Math.floor(Math.random() * 800 * baseFactor) + 100,
-    }
+    },
+    demographicData: [
+      { name: '18-24', value: Math.floor(Math.random() * 20 * baseFactor) + 5 },
+      { name: '25-34', value: Math.floor(Math.random() * 35 * baseFactor) + 15 },
+      { name: '35-44', value: Math.floor(Math.random() * 25 * baseFactor) + 10 },
+      { name: '45-54', value: Math.floor(Math.random() * 15 * baseFactor) + 5 },
+      { name: '55+', value: Math.floor(Math.random() * 10 * baseFactor) + 3 },
+    ],
+    postHistory: Array(5).fill(0).map((_, i) => ({
+      id: `post-${i}`,
+      content: `Sample post content #${i + 1} for ${platform}`,
+      date: new Date(Date.now() - (i * 86400000)).toLocaleDateString(),
+      likes: Math.floor(Math.random() * 100 * baseFactor),
+      comments: Math.floor(Math.random() * 20 * baseFactor),
+      shares: Math.floor(Math.random() * 15 * baseFactor),
+    }))
   };
 };
 
@@ -74,18 +96,13 @@ const Analytics: React.FC = () => {
   // Get platform data based on selection
   const platformData = generatePlatformData(selectedPlatform);
   
-  // Get name of current month and date range
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - parseInt(dateRange));
-  const endDate = new Date();
-  
-  const formattedStartDate = `Mar 12, 2025`;
-  const formattedEndDate = `Apr 10, 2025`;
-
   // Get platform display name
   const getPlatformDisplayName = (platform: SocialPlatform) => {
     return platform.charAt(0).toUpperCase() + platform.slice(1);
   };
+  
+  const formattedStartDate = `Mar 12, 2025`;
+  const formattedEndDate = `Apr 10, 2025`;
   
   return (
     <>
@@ -155,71 +172,199 @@ const Analytics: React.FC = () => {
         </div>
         
         <div className="border-t pt-6 mt-4">
-          <h2 className="text-2xl font-bold mb-6">{getPlatformDisplayName(selectedPlatform)} Profile - Darshan</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-            <MetricCard 
-              title="Total Connections" 
-              value={platformData.metrics.connections.toString()} 
-            />
-            <MetricCard 
-              title="Total Posts" 
-              value={platformData.metrics.posts.toString()} 
-              trend={{ value: "+5", period: "last 30 days" }}
-            />
-            <MetricCard 
-              title="Total Comments" 
-              value={platformData.metrics.comments.toString()} 
-              trend={{ value: "+8%", period: "last 30 days" }}
-            />
-            <MetricCard 
-              title="Total Reactions" 
-              value={platformData.metrics.reactions.toString()} 
-              trend={{ value: "+12%", period: "last 30 days" }}
-            />
-            <MetricCard 
-              title="Total Engagement" 
-              value={platformData.metrics.engagement.toString()} 
-            />
-          </div>
-          
-          <div className="space-y-6 mt-8">
-            <AnalyticsChart 
-              title="Publishing Trend" 
-              description="Review publishing patterns of your post types over time"
-              data={platformData.publishingTrend}
-              type="line"
-              lines={[
-                { dataKey: 'Text', color: '#4f46e5', name: 'Text' },
-                { dataKey: 'Image', color: '#ec4899', name: 'Image' },
-                { dataKey: 'Video', color: '#10b981', name: 'Video' },
-                { dataKey: 'Article', color: '#f59e0b', name: 'Article' },
-                { dataKey: 'Document', color: '#ef4444', name: 'Document' },
-                { dataKey: 'Others', color: '#6b7280', name: 'Others' }
-              ]}
-            />
+          <Tabs defaultValue="page" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="page" className="flex gap-2">
+                <FileBarChart className="h-4 w-4" />
+                Page Analytics
+              </TabsTrigger>
+              <TabsTrigger value="post" className="flex gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Post Analytics
+              </TabsTrigger>
+              <TabsTrigger value="insights" className="flex gap-2">
+                <Lightbulb className="h-4 w-4" />
+                Insights
+              </TabsTrigger>
+            </TabsList>
             
-            <AnalyticsChart 
-              title="Engagement Trend" 
-              description="Measure engagement patterns through likes and comments over time"
-              data={platformData.engagementTrend}
-              type="line"
-              lines={[
-                { dataKey: 'Reactions', color: '#4f46e5', name: 'Reactions' },
-                { dataKey: 'Comments', color: '#ec4899', name: 'Comments' }
-              ]}
-            />
+            {/* Page Analytics Tab Content */}
+            <TabsContent value="page" className="space-y-6">
+              <h2 className="text-2xl font-bold mb-6">{getPlatformDisplayName(selectedPlatform)} Profile - Darshan</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                <MetricCard 
+                  title="Total Connections" 
+                  value={platformData.metrics.connections.toString()} 
+                />
+                <MetricCard 
+                  title="Total Posts" 
+                  value={platformData.metrics.posts.toString()} 
+                  trend={{ value: "+5", period: "last 30 days" }}
+                />
+                <MetricCard 
+                  title="Total Comments" 
+                  value={platformData.metrics.comments.toString()} 
+                  trend={{ value: "+8%", period: "last 30 days" }}
+                />
+                <MetricCard 
+                  title="Total Reactions" 
+                  value={platformData.metrics.reactions.toString()} 
+                  trend={{ value: "+12%", period: "last 30 days" }}
+                />
+                <MetricCard 
+                  title="Total Engagement" 
+                  value={platformData.metrics.engagement.toString()} 
+                />
+              </div>
+              
+              <div className="space-y-6">
+                <AnalyticsChart 
+                  title="Publishing Trend" 
+                  description="Review publishing patterns of your post types over time"
+                  data={platformData.publishingTrend}
+                  type="line"
+                  lines={[
+                    { dataKey: 'Text', color: '#4f46e5', name: 'Text' },
+                    { dataKey: 'Image', color: '#ec4899', name: 'Image' },
+                    { dataKey: 'Video', color: '#10b981', name: 'Video' },
+                    { dataKey: 'Article', color: '#f59e0b', name: 'Article' },
+                    { dataKey: 'Document', color: '#ef4444', name: 'Document' },
+                    { dataKey: 'Others', color: '#6b7280', name: 'Others' }
+                  ]}
+                />
+                
+                <AnalyticsChart 
+                  title="Engagement Trend" 
+                  description="Measure engagement patterns through likes and comments over time"
+                  data={platformData.engagementTrend}
+                  type="line"
+                  lines={[
+                    { dataKey: 'Reactions', color: '#4f46e5', name: 'Reactions' },
+                    { dataKey: 'Comments', color: '#ec4899', name: 'Comments' }
+                  ]}
+                />
+              </div>
+            </TabsContent>
             
-            <EngagementTable 
-              title="Median and Total Engagement"
-              description="Compare median and total engagement performance across different content types"
-            />
+            {/* Post Analytics Tab Content */}
+            <TabsContent value="post" className="space-y-6">
+              <h2 className="text-2xl font-bold mb-6">Post Performance Analysis</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <MetricCard 
+                  title="Average Engagement" 
+                  value={(Math.random() * 10).toFixed(2) + "%"} 
+                  trend={{ value: "+2.4%", period: "last 30 days" }}
+                />
+                <MetricCard 
+                  title="Top Post Reach" 
+                  value={(Math.random() * 10000).toFixed(0)}
+                  trend={{ value: "+18%", period: "last 30 days" }}
+                />
+                <MetricCard 
+                  title="Click-through Rate" 
+                  value={(Math.random() * 5).toFixed(2) + "%"}
+                  trend={{ value: "-0.5%", period: "last 30 days" }}
+                />
+                <MetricCard 
+                  title="Conversion Rate" 
+                  value={(Math.random() * 3).toFixed(2) + "%"}
+                  trend={{ value: "+0.8%", period: "last 30 days" }}
+                />
+              </div>
+              
+              <AnalyticsChart 
+                title="Post Performance by Type" 
+                description="Compare engagement across different post types"
+                data={[
+                  { type: 'Text', engagement: Math.floor(Math.random() * 50) + 10, reach: Math.floor(Math.random() * 500) + 100 },
+                  { type: 'Image', engagement: Math.floor(Math.random() * 80) + 30, reach: Math.floor(Math.random() * 800) + 300 },
+                  { type: 'Video', engagement: Math.floor(Math.random() * 100) + 50, reach: Math.floor(Math.random() * 1000) + 500 },
+                  { type: 'Article', engagement: Math.floor(Math.random() * 60) + 20, reach: Math.floor(Math.random() * 600) + 200 },
+                  { type: 'Document', engagement: Math.floor(Math.random() * 40) + 10, reach: Math.floor(Math.random() * 400) + 100 },
+                ]}
+                type="bar"
+                lines={[
+                  { dataKey: 'engagement', color: '#4f46e5', name: 'Engagement' },
+                  { dataKey: 'reach', color: '#10b981', name: 'Reach' }
+                ]}
+              />
+              
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold">Post History</h3>
+                <div className="bg-white rounded-lg shadow divide-y">
+                  {platformData.postHistory.map((post) => (
+                    <div key={post.id} className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-500">{post.date}</p>
+                          <p className="text-base">{post.content}</p>
+                        </div>
+                        <div className="flex space-x-4 text-sm">
+                          <div className="flex items-center">
+                            <span className="font-medium text-gray-700">{post.likes}</span>
+                            <span className="ml-1 text-gray-500">Likes</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="font-medium text-gray-700">{post.comments}</span>
+                            <span className="ml-1 text-gray-500">Comments</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="font-medium text-gray-700">{post.shares}</span>
+                            <span className="ml-1 text-gray-500">Shares</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
             
-            <PostPerformance
-              title="Post Performance"
-              description="Analyze individual post performance through likes and comments"
-            />
-          </div>
+            {/* Insights Tab Content */}
+            <TabsContent value="insights" className="space-y-6">
+              <h2 className="text-2xl font-bold mb-6">Account Insights</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <EngagementTable 
+                  title="Content Performance" 
+                  description="Compare median and total engagement performance across content types"
+                />
+                
+                <div className="space-y-6">
+                  <PostPerformance 
+                    title="Audience Demographics" 
+                    description="Analyze your audience by age and gender"
+                  />
+                  
+                  <Card className="p-4">
+                    <h3 className="text-lg font-semibold mb-4">Recommended Actions</h3>
+                    <ul className="space-y-2">
+                      <li className="flex items-start">
+                        <div className="bg-blue-100 p-1 rounded mr-2">
+                          <Lightbulb className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <span className="text-sm">Post more video content to increase engagement rate</span>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="bg-blue-100 p-1 rounded mr-2">
+                          <Lightbulb className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <span className="text-sm">Engage with comments more frequently to boost interaction</span>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="bg-blue-100 p-1 rounded mr-2">
+                          <Lightbulb className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <span className="text-sm">Target content towards 25-34 age group for better reach</span>
+                      </li>
+                    </ul>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </>
