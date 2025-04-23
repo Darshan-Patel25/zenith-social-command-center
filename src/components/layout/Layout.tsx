@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import SideNav from './SideNav';
 import Header from './Header';
@@ -12,23 +11,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
-  // Detect window size for responsive behavior
   useEffect(() => {
     const handleResize = () => {
       setIsSidebarOpen(window.innerWidth >= 1024);
     };
     
-    // Set initial state
     handleResize();
     
-    // Add event listener
     window.addEventListener('resize', handleResize);
     
-    // Cleanup
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  // Get page title based on current route
   const getTitle = (): string => {
     const path = location.pathname;
     
@@ -41,7 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (path === '/profile') return 'My Profile';
     if (path === '/settings') return 'Settings';
     
-    return 'Zenith';
+    return 'Trendlyzer';
   };
 
   return (

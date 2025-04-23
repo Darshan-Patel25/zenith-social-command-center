@@ -97,9 +97,9 @@ const SideNav = () => {
         <div className="flex items-center relative w-full">
           <Link to="/" className="flex items-center">
             <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold">Z</span>
+              <span className="text-white font-bold">T</span>
             </div>
-            {isOpen && <h1 className="ml-2 text-xl font-bold text-white">Zenith</h1>}
+            {isOpen && <h1 className="ml-2 text-xl font-bold text-white">Trendlyzer</h1>}
           </Link>
           <Button 
             variant="ghost" 
