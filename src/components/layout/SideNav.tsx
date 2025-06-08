@@ -12,15 +12,10 @@ import {
   Send,
   ChevronLeft,
   ChevronRight,
-  Menu,
-  FileText,
-  Bot,
-  ChevronDown
+  Menu
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import SocialIcon from '@/components/common/SocialIcon';
-import { SocialPlatform } from '@/types';
 
 const SideNav = () => {
   const location = useLocation();
@@ -50,16 +45,21 @@ const SideNav = () => {
     setIsOpen(!isOpen);
   };
   
-  const mainNavItems = [
+  const navItems = [
     {
       icon: <LayoutDashboard className="w-5 h-5" />,
       label: 'Dashboard',
       path: '/',
     },
     {
-      icon: <FileText className="w-5 h-5" />,
+      icon: <PenLine className="w-5 h-5" />,
       label: 'Content',
       path: '/content',
+    },
+    {
+      icon: <Send className="w-5 h-5" />,
+      label: 'Create Post',
+      path: '/create-post',
     },
     {
       icon: <Calendar className="w-5 h-5" />,
@@ -73,13 +73,8 @@ const SideNav = () => {
     },
     {
       icon: <MessageCircle className="w-5 h-5" />,
-      label: 'Engage',
+      label: 'Engagement',
       path: '/engagement',
-    },
-    {
-      icon: <Bot className="w-5 h-5" />,
-      label: 'Telegram Bot',
-      path: '/telegram-bot',
     },
     {
       icon: <UserCircle className="w-5 h-5" />,
@@ -93,25 +88,18 @@ const SideNav = () => {
     },
   ];
 
-  const platforms: { platform: SocialPlatform; connected: boolean }[] = [
-    { platform: 'instagram', connected: true },
-    { platform: 'twitter', connected: true },
-    { platform: 'facebook', connected: true },
-    { platform: 'telegram', connected: true },
-  ];
-
   return (
     <div className={cn(
-      "h-screen fixed left-0 top-0 bg-sidebar flex flex-col border-r border-slate-800 transition-all duration-300 z-50",
-      isOpen ? "w-64" : "w-16"
+      "h-screen fixed left-0 top-0 bg-sidebar flex flex-col border-r border-slate-800 transition-all duration-300",
+      isOpen ? "w-52" : "w-16"
     )}>
       <div className="p-4 flex items-center justify-between mb-6">
         <div className="flex items-center relative w-full">
           <Link to="/" className="flex items-center">
             <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold">T</span>
+              <span className="text-white font-bold">Z</span>
             </div>
-            {isOpen && <h1 className="ml-2 text-xl font-bold text-white">Trendlyzer</h1>}
+            {isOpen && <h1 className="ml-2 text-xl font-bold text-white">Zenith</h1>}
           </Link>
           <Button 
             variant="ghost" 
@@ -124,24 +112,15 @@ const SideNav = () => {
         </div>
       </div>
       
-      {/* Main Menu Section */}
-      {isOpen && (
-        <div className="px-3 mb-4">
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            MAIN MENU
-          </h3>
-        </div>
-      )}
-      
       <nav className="flex-1 overflow-y-auto">
         <ul className="flex flex-col space-y-1 px-2">
-          {mainNavItems.map((item, index) => (
+          {navItems.map((item, index) => (
             <li key={index}>
               <Link
                 to={item.path}
                 className={cn(
                   "flex items-center px-3 py-2 text-slate-300 hover:bg-sidebar-accent rounded-md transition-colors",
-                  location.pathname === item.path && "bg-blue-600 text-white hover:bg-blue-700"
+                  location.pathname === item.path && "bg-sidebar-accent text-white"
                 )}
               >
                 <span className="flex-shrink-0">{item.icon}</span>
@@ -150,52 +129,17 @@ const SideNav = () => {
             </li>
           ))}
         </ul>
-
-        {/* Platforms Section */}
-        {isOpen && (
-          <div className="px-3 mt-8 mb-4">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-              PLATFORMS
-            </h3>
-            <div className="space-y-2">
-              {platforms.map(({ platform, connected }) => (
-                <div 
-                  key={platform}
-                  className="flex items-center justify-between px-3 py-2 text-slate-300 hover:bg-sidebar-accent rounded-md transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <SocialIcon platform={platform} size={20} />
-                    <span className="text-sm capitalize">{platform}</span>
-                  </div>
-                  <div className={cn(
-                    "w-2 h-2 rounded-full",
-                    connected ? "bg-green-500" : "bg-red-500"
-                  )} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </nav>
       
-      {/* User Profile Section */}
-      <div className="p-4 mt-auto border-t border-slate-700">
-        <div className={cn(
-          "flex items-center",
-          !isOpen && "justify-center"
-        )}>
+      <div className="p-4 mt-auto">
+        <div className={cn("flex items-center", !isOpen && "justify-center")}>
           <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">A</span>
+            <span className="text-white font-bold">U</span>
           </div>
           {isOpen && (
-            <div className="ml-3 flex-1">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Arthur Team</p>
-                  <p className="text-xs text-slate-400">Premium Account</p>
-                </div>
-                <ChevronDown className="w-4 h-4 text-slate-400" />
-              </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-white">User Name</p>
+              <p className="text-xs text-slate-400">Free Plan</p>
             </div>
           )}
         </div>

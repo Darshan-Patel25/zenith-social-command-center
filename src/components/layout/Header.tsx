@@ -15,23 +15,10 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title }) => {
-  const headerTitles = {
-    'Dashboard': 'Trendlyzer Dashboard',
-    'Content': 'Trendlyzer Content',
-    'Create Post': 'Trendlyzer Create Post',
-    'Schedule': 'Trendlyzer Schedule',
-    'Analytics': 'Trendlyzer Analytics',
-    'Engagement': 'Trendlyzer Engagement',
-    'Profile': 'Trendlyzer Profile',
-    'Settings': 'Trendlyzer Settings',
-  };
-
-  const displayTitle = headerTitles[title as keyof typeof headerTitles] || title;
-
   return (
     <div className="border-b bg-white flex items-center justify-between p-4">
       <div>
-        <h1 className="text-xl font-bold">{displayTitle}</h1>
+        <h1 className="text-xl font-bold">{title}</h1>
       </div>
       
       <div className="flex items-center space-x-4">

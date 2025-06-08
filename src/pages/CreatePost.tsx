@@ -28,9 +28,7 @@ import {
   Clock,
   Edit,
   Eye,
-  Search,
-  Check,
-  ChevronDown
+  Search
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -48,31 +46,20 @@ import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 
-const accounts = [
-  { id: '1', platform: 'instagram' as SocialPlatform, name: 'Arthur Team', username: '@arthurteam', followers: '12.5K', selected: true },
-  { id: '2', platform: 'facebook' as SocialPlatform, name: 'Arthur Business', username: 'Arthur Business Page', followers: '8.2K', selected: false },
-  { id: '3', platform: 'twitter' as SocialPlatform, name: 'Arthur', username: '@arthur_social', followers: '5.8K', selected: false },
-  { id: '4', platform: 'linkedin' as SocialPlatform, name: 'Arthur Professional', username: 'Arthur Team', followers: '3.1K', selected: true },
-  { id: '5', platform: 'telegram' as SocialPlatform, name: 'Arthur Channel', username: '@arthur_updates', followers: '2.4K', selected: false },
-];
+const platforms: SocialPlatform[] = ['facebook', 'twitter', 'linkedin', 'instagram', 'tiktok'];
 
 const CreatePost: React.FC = () => {
   const [activeTab, setActiveTab] = useState('create');
-  const [selectedAccounts, setSelectedAccounts] = useState(accounts.filter(acc => acc.selected));
+  const [selectedPlatforms, setSelectedPlatforms] = useState<SocialPlatform[]>(['linkedin']);
   const [postContent, setPostContent] = useState('');
   const [postNow, setPostNow] = useState(true);
   const [activeRightTab, setActiveRightTab] = useState('preview');
-  const [showAccountSelector, setShowAccountSelector] = useState(false);
 
-  const toggleAccount = (accountId: string) => {
-    const account = accounts.find(acc => acc.id === accountId);
-    if (!account) return;
-
-    const isSelected = selectedAccounts.some(acc => acc.id === accountId);
-    if (isSelected) {
-      setSelectedAccounts(selectedAccounts.filter(acc => acc.id !== accountId));
+  const togglePlatform = (platform: SocialPlatform) => {
+    if (selectedPlatforms.includes(platform)) {
+      setSelectedPlatforms(selectedPlatforms.filter(p => p !== platform));
     } else {
-      setSelectedAccounts([...selectedAccounts, account]);
+      setSelectedPlatforms([...selectedPlatforms, platform]);
     }
   };
 
@@ -114,78 +101,15 @@ const CreatePost: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow">
         <div className="lg:col-span-2 space-y-4">
-          {/* Account Selector */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium">Selected Accounts ({selectedAccounts.length})</h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAccountSelector(!showAccountSelector)}
-                  className="gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Account
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showAccountSelector ? 'rotate-180' : ''}`} />
-                </Button>
-              </div>
-              
-              <div className="flex flex-wrap gap-2 mb-3">
-                {selectedAccounts.map((account) => (
-                  <div key={account.id} className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1.5">
-                    <SocialIcon platform={account.platform} size={16} />
-                    <span className="text-sm">{account.name}</span>
-                    <button
-                      onClick={() => toggleAccount(account.id)}
-                      className="text-gray-500 hover:text-red-500"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {showAccountSelector && (
-                <div className="border rounded-lg p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Input placeholder="Search accounts..." className="max-w-xs" />
-                    <Button variant="link" className="text-blue-500">
-                      Select All
-                    </Button>
-                  </div>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {accounts.map((account) => (
-                      <div
-                        key={account.id}
-                        className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
-                        onClick={() => toggleAccount(account.id)}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Checkbox 
-                            checked={selectedAccounts.some(acc => acc.id === account.id)}
-                            onChange={() => toggleAccount(account.id)}
-                          />
-                          <SocialIcon platform={account.platform} size={20} />
-                          <div>
-                            <p className="font-medium text-sm">{account.name}</p>
-                            <p className="text-xs text-gray-500">{account.username} • {account.followers}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Post Content */}
           <Card className="border rounded-lg overflow-hidden">
             <CardContent className="p-0">
               <div className="p-2 border-b bg-gray-50 flex">
-                <Button variant="ghost" size="sm" className="rounded-none">
-                  <span className="bg-blue-600 text-white rounded p-1">📝</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={`rounded-none ${selectedPlatforms.includes('linkedin') ? 'bg-blue-50' : ''}`}
+                >
+                  <span className="bg-blue-600 text-white rounded p-1">in</span>
                   <span className="ml-2">Original Draft</span>
                 </Button>
               </div>
@@ -221,13 +145,12 @@ const CreatePost: React.FC = () => {
                   </Button>
                 </div>
                 <div>
-                  <span className="text-gray-400">{postContent.length}</span>
+                  <span className="text-gray-400">0</span>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          {/* Additional Options */}
           <div className="flex items-center justify-between">
             <Button variant="ghost" className="flex items-center gap-1">
               <Tag className="h-4 w-4" />
@@ -240,51 +163,52 @@ const CreatePost: React.FC = () => {
             </Button>
           </div>
           
-          {/* Action Buttons */}
           <div className="flex justify-between gap-2 mt-auto pt-6">
             <Button variant="outline" className="flex items-center gap-2">
               <Save className="h-4 w-4" />
               Save as Draft
+              <span className="ml-1">
+                <svg width="10" height="10" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 6L7.5 9.5L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
             </Button>
-            <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+            <Button className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600">
               <Calendar className="h-4 w-4" />
               Schedule Post
+              <span className="ml-1">
+                <svg width="10" height="10" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 6L7.5 9.5L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
             </Button>
           </div>
         </div>
         
-        {/* Right Panel */}
         <div className="lg:col-span-1">
           <Card className="h-full">
             <CardContent className="p-0 flex flex-col h-full">
               <div className="border-b">
                 <Tabs value={activeRightTab} onValueChange={setActiveRightTab}>
                   <TabsList className="w-full">
-                    <TabsTrigger value="preview" className="flex-1">Preview</TabsTrigger>
-                    <TabsTrigger value="schedule" className="flex-1">Schedule</TabsTrigger>
+                    <TabsTrigger value="preview" className="flex-1">Post Preview</TabsTrigger>
+                    <TabsTrigger value="comments" className="flex-1">Comments</TabsTrigger>
+                    <TabsTrigger value="accounts" className="flex-1">Accounts</TabsTrigger>
                   </TabsList>
                 
                   <TabsContent value="preview" className="flex-grow p-4">
                     {postContent ? (
-                      <div className="space-y-4">
-                        {selectedAccounts.map((account) => (
-                          <div key={account.id} className="border rounded-lg p-4">
-                            <div className="flex items-center gap-2 mb-3">
-                              <SocialIcon platform={account.platform} size={20} />
-                              <span className="font-medium text-sm">{account.name}</span>
-                            </div>
-                            <div className="flex items-center space-x-2 mb-3">
-                              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                <span className="text-blue-600 font-semibold text-xs">A</span>
-                              </div>
-                              <div>
-                                <p className="font-medium text-sm">{account.name}</p>
-                                <p className="text-xs text-gray-500">Just now</p>
-                              </div>
-                            </div>
-                            <p className="text-sm">{postContent}</p>
+                      <div className="border rounded-lg m-4 p-4">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span className="text-blue-600 font-semibold">U</span>
                           </div>
-                        ))}
+                          <div>
+                            <p className="font-medium">User Name</p>
+                            <p className="text-xs text-gray-500">Just now</p>
+                          </div>
+                        </div>
+                        <p className="text-sm mb-3">{postContent}</p>
                       </div>
                     ) : (
                       <div className="text-center py-8 text-gray-500 flex flex-col items-center justify-center h-full">
@@ -294,47 +218,68 @@ const CreatePost: React.FC = () => {
                     )}
                   </TabsContent>
                   
-                  <TabsContent value="schedule" className="flex-grow p-4">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="post-immediately">Post Immediately</Label>
-                        <div className="flex items-center space-x-2 mt-2">
-                          <Switch 
-                            id="post-immediately" 
-                            checked={postNow} 
-                            onCheckedChange={setPostNow} 
-                          />
-                          <span className="text-sm text-gray-500">
-                            {postNow ? 'Post now' : 'Schedule for later'}
-                          </span>
+                  <TabsContent value="comments" className="flex-grow p-4">
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No comments configuration available</p>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="accounts" className="flex-grow overflow-auto">
+                    <div className="p-4">
+                      <div className="mb-4">
+                        <h3 className="font-medium mb-2">Group</h3>
+                        <div className="flex justify-between items-center mb-4">
+                          <div className="relative max-w-[240px] w-full">
+                            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input 
+                              className="pl-8 max-w-[240px]" 
+                              placeholder="Search an account"
+                            />
+                          </div>
+                          <Button variant="ghost" size="icon">
+                            <Filter className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Checkbox id="select-all" />
+                              <Label htmlFor="select-all">1 Account selected.</Label>
+                            </div>
+                            <Button variant="link" className="text-blue-500 h-auto p-0">
+                              Clear All
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center border p-2 rounded-md justify-between bg-gray-50">
+                            <div className="flex items-center gap-2">
+                              <Checkbox id="linkedin-account" checked />
+                              <div className="flex items-center gap-1">
+                                <div className="bg-blue-600 text-white rounded p-1 flex items-center justify-center h-6 w-6">
+                                  in
+                                </div>
+                                <Label htmlFor="linkedin-account">Darshan</Label>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       
-                      {!postNow && (
-                        <div className="space-y-3">
-                          <div>
-                            <Label htmlFor="schedule-date">Date & Time</Label>
-                            <Input 
-                              id="schedule-date"
-                              type="datetime-local" 
-                              className="mt-1"
-                            />
+                      <div className="mt-8">
+                        <div className="flex items-center justify-center flex-col gap-2">
+                          <div className="w-full max-w-[240px]">
+                            <img src="/lovable-uploads/dfc9e41d-494b-4d37-97d8-ec2f91b236a4.png" alt="Empty state" className="w-full" />
                           </div>
-                          <div>
-                            <Label htmlFor="timezone">Timezone</Label>
-                            <Select>
-                              <SelectTrigger className="mt-1">
-                                <SelectValue placeholder="Select timezone" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="utc">UTC</SelectItem>
-                                <SelectItem value="est">EST</SelectItem>
-                                <SelectItem value="pst">PST</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                          <p className="text-center text-gray-500">You have not created any groups yet</p>
+                          <p className="text-center text-sm text-gray-400 max-w-[300px]">
+                            You can sort your social media accounts in a Group. Use it for quick selection, filtering and more.
+                          </p>
+                          <Button className="mt-2">
+                            <Plus className="h-4 w-4 mr-1" /> Create Group
+                          </Button>
                         </div>
-                      )}
+                      </div>
                     </div>
                   </TabsContent>
                 </Tabs>
