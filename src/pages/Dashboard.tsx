@@ -14,10 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import SocialIcon from '@/components/common/SocialIcon';
 import UpcomingPosts from '@/components/dashboard/UpcomingPosts';
 import PlatformStats from '@/components/dashboard/PlatformStats';
-import { SocialPlatform } from '@/types';
 
 // Sample data for performance chart
 const performanceData = [
@@ -39,16 +37,7 @@ const platformBarData = [
 ];
 
 const Dashboard: React.FC = () => {
-  const [selectedPlatform, setSelectedPlatform] = useState<'all' | SocialPlatform>('all');
   const [timeRange, setTimeRange] = useState('30');
-
-  const platforms = [
-    { value: 'all', label: 'All Platforms', icon: '🌐' },
-    { value: 'instagram', label: 'Instagram', icon: 'instagram' as SocialPlatform },
-    { value: 'twitter', label: 'Twitter', icon: 'twitter' as SocialPlatform },
-    { value: 'facebook', label: 'Facebook', icon: 'facebook' as SocialPlatform },
-    { value: 'telegram', label: 'Telegram', icon: 'telegram' as SocialPlatform },
-  ];
 
   return (
     <div className="space-y-6">
@@ -70,29 +59,6 @@ const Dashboard: React.FC = () => {
             </Link>
           </Button>
         </div>
-      </div>
-      
-      {/* Platform Filters */}
-      <div className="flex flex-wrap gap-2">
-        {platforms.map((platform) => (
-          <Button
-            key={platform.value}
-            variant={selectedPlatform === platform.value ? "default" : "outline"}
-            className={`gap-2 ${
-              selectedPlatform === platform.value 
-                ? "bg-blue-600 hover:bg-blue-700 text-white" 
-                : "border-gray-200 hover:bg-gray-50"
-            }`}
-            onClick={() => setSelectedPlatform(platform.value as 'all' | SocialPlatform)}
-          >
-            {platform.icon === '🌐' ? (
-              <span>🌐</span>
-            ) : (
-              <SocialIcon platform={platform.icon} size={16} />
-            )}
-            <span>{platform.label}</span>
-          </Button>
-        ))}
       </div>
       
       {/* Metrics Cards */}
