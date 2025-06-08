@@ -6,16 +6,17 @@ import {
   Share, 
   Eye,
   Plus,
-  Bell
+  Bell,
+  TrendingUp
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import SocialIcon from '@/components/common/SocialIcon';
 import UpcomingPosts from '@/components/dashboard/UpcomingPosts';
+import PlatformStats from '@/components/dashboard/PlatformStats';
 import { SocialPlatform } from '@/types';
 
 // Sample data for performance chart
@@ -29,24 +30,24 @@ const performanceData = [
   { date: '06/08', engagement: 2.7, reach: 105, followers: 262 },
 ];
 
-// Sample data for platform performance
-const platformData = [
-  { platform: 'Instagram', posts: 180, engagement: 4.2 },
-  { platform: 'Facebook', posts: 95, engagement: 3.1 },
-  { platform: 'Twitter', posts: 45, engagement: 2.8 },
-  { platform: 'Telegram', posts: 15, engagement: 1.9 },
+// Sample data for platform performance bar chart
+const platformBarData = [
+  { platform: 'Instagram', engagement: 4.2, posts: 180 },
+  { platform: 'Facebook', engagement: 3.1, posts: 95 },
+  { platform: 'Twitter', engagement: 2.8, posts: 45 },
+  { platform: 'Telegram', engagement: 1.9, posts: 15 },
 ];
 
 const Dashboard: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] = useState<'all' | SocialPlatform>('all');
   const [timeRange, setTimeRange] = useState('30');
 
-  const platforms: { value: 'all' | SocialPlatform; label: string; icon?: SocialPlatform }[] = [
-    { value: 'all', label: 'All Platforms' },
-    { value: 'instagram', label: 'Instagram', icon: 'instagram' },
-    { value: 'twitter', label: 'Twitter', icon: 'twitter' },
-    { value: 'facebook', label: 'Facebook', icon: 'facebook' },
-    { value: 'telegram', label: 'Telegram', icon: 'telegram' },
+  const platforms = [
+    { value: 'all', label: 'All Platforms', icon: '🌐' },
+    { value: 'instagram', label: 'Instagram', icon: 'instagram' as SocialPlatform },
+    { value: 'twitter', label: 'Twitter', icon: 'twitter' as SocialPlatform },
+    { value: 'facebook', label: 'Facebook', icon: 'facebook' as SocialPlatform },
+    { value: 'telegram', label: 'Telegram', icon: 'telegram' as SocialPlatform },
   ];
 
   return (
@@ -62,7 +63,7 @@ const Dashboard: React.FC = () => {
           <Button variant="ghost" size="icon">
             <Bell className="w-4 h-4" />
           </Button>
-          <Button asChild className="gap-2">
+          <Button asChild className="gap-2 bg-blue-600 hover:bg-blue-700">
             <Link to="/create-post">
               <Plus className="w-4 h-4" />
               <span>New Post</span>
@@ -77,10 +78,18 @@ const Dashboard: React.FC = () => {
           <Button
             key={platform.value}
             variant={selectedPlatform === platform.value ? "default" : "outline"}
-            className="gap-2"
-            onClick={() => setSelectedPlatform(platform.value)}
+            className={`gap-2 ${
+              selectedPlatform === platform.value 
+                ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                : "border-gray-200 hover:bg-gray-50"
+            }`}
+            onClick={() => setSelectedPlatform(platform.value as 'all' | SocialPlatform)}
           >
-            {platform.icon && <SocialIcon platform={platform.icon} size={16} />}
+            {platform.icon === '🌐' ? (
+              <span>🌐</span>
+            ) : (
+              <SocialIcon platform={platform.icon} size={16} />
+            )}
             <span>{platform.label}</span>
           </Button>
         ))}
@@ -217,7 +226,7 @@ const Dashboard: React.FC = () => {
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={platformData} layout="horizontal">
+                <BarChart data={platformBarData} layout="horizontal">
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 12 }} />
                   <YAxis 
@@ -227,14 +236,17 @@ const Dashboard: React.FC = () => {
                     width={80}
                   />
                   <Tooltip />
-                  <Bar dataKey="posts" fill="#10b981" name="Posts" />
                   <Bar dataKey="engagement" fill="#8b5cf6" name="Engagement %" />
+                  <Bar dataKey="posts" fill="#10b981" name="Posts" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
       </div>
+      
+      {/* Additional Platform Stats */}
+      <PlatformStats />
       
       {/* Upcoming Posts */}
       <UpcomingPosts />
