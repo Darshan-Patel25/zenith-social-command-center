@@ -85,7 +85,7 @@ const SideNav = () => {
 
   return (
     <div className={cn(
-      "h-screen fixed left-0 top-0 bg-sidebar flex flex-col border-r border-slate-800 transition-all duration-300",
+      "h-screen fixed left-0 top-0 bg-white flex flex-col border-r border-gray-200 transition-all duration-300",
       isOpen ? "w-52" : "w-16"
     )}>
       <div className="p-4 flex items-center justify-between mb-6">
@@ -94,12 +94,12 @@ const SideNav = () => {
             <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white font-bold">T</span>
             </div>
-            {isOpen && <h1 className="ml-2 text-xl font-bold text-white">Trendlyzer</h1>}
+            {isOpen && <h1 className="ml-2 text-xl font-bold text-black">Trendlyzer</h1>}
           </Link>
           <Button 
             variant="ghost" 
             size="icon"
-            className="text-slate-300 hover:text-white p-0 h-8 w-8 absolute right-0"
+            className="text-gray-600 hover:text-black p-0 h-8 w-8 absolute right-0"
             onClick={toggleSidebar}
           >
             {isOpen ? <Menu className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
@@ -114,8 +114,8 @@ const SideNav = () => {
               <Link
                 to={item.path}
                 className={cn(
-                  "flex items-center px-3 py-2 text-slate-300 hover:bg-sidebar-accent rounded-md transition-colors",
-                  location.pathname === item.path && "bg-sidebar-accent text-white"
+                  "flex items-center px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors",
+                  location.pathname === item.path && "bg-gray-100 text-black"
                 )}
               >
                 <span className="flex-shrink-0">{item.icon}</span>
@@ -133,8 +133,8 @@ const SideNav = () => {
           </div>
           {isOpen && (
             <div className="ml-3">
-              <p className="text-sm font-medium text-white">User Name</p>
-              <p className="text-xs text-slate-400">Free Plan</p>
+              <p className="text-sm font-medium text-black">User Name</p>
+              <p className="text-xs text-gray-500">Free Plan</p>
             </div>
           )}
         </div>
