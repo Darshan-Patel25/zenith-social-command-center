@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Send,
+  FilePen,
   Calendar,
   BarChart3,
   MessageCircle,
@@ -32,6 +33,7 @@ const SideNav = () => {
 
   const navItems = [
     { icon: <LayoutDashboard className="w-5 h-5" />, label: 'Dashboard', path: '/' },
+    { icon: <FilePen className="w-5 h-5" />, label: 'Content', path: '/content' },
     { icon: <Send className="w-5 h-5" />, label: 'Create Post', path: '/create-post' },
     { icon: <Calendar className="w-5 h-5" />, label: 'Schedule', path: '/schedule' },
     { icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics', path: '/analytics' },
@@ -59,7 +61,7 @@ const SideNav = () => {
           <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
             <span className="text-white font-bold select-none text-lg">T</span>
           </div>
-          {isOpen && <h1 className="text-xl font-semibold text-gray-900 select-none">Trendlyzer</h1>}
+          {isOpen && <h1 className="text-2xl font-bold text-gray-900 select-none">Trendlyzer</h1>}
         </Link>
         <Button
           variant="ghost"
@@ -73,8 +75,8 @@ const SideNav = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto mt-3">
-        <ul className="flex flex-col space-y-1 px-2">
+      <nav className="flex-1 overflow-y-auto mt-4">
+        <ul className="flex flex-col space-y-3 px-2">
           {navItems.map(({ icon, label, path }, idx) => {
             const isActive = location.pathname === path;
             return (
@@ -82,7 +84,7 @@ const SideNav = () => {
                 <Link
                   to={path}
                   className={cn(
-                    'group flex items-center gap-4 rounded-md px-3 py-2 font-semibold transition-colors',
+                    'group flex items-center gap-4 rounded-md px-3 py-2 font-bold transition-colors',
                     isActive
                       ? 'bg-blue-100 text-blue-700 shadow-inner'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'

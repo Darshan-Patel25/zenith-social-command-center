@@ -15,6 +15,7 @@ import Profile from "@/pages/Profile";
 import Account from "@/pages/Account";
 import Settings from "@/pages/Settings";
 import NotFound from "./pages/NotFound";
+import Content from "./pages/Content";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -40,6 +41,7 @@ const App = () => {
             <Route path="/engagement" element={<Layout><Engagement /></Layout>} />
             <Route path="/profile" element={<Layout><Profile /></Layout>} />
             <Route path="/account" element={<Layout><Account /></Layout>} />
+            <Route path="/content" element={<Layout><Content /></Layout>} />
             <Route path="/settings" element={<Layout><Settings /></Layout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

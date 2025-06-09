@@ -1,274 +1,264 @@
-
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
-} from '@/components/ui/card';
+ import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle, Eye, Pencil, Trash, FileText, Import, Rss, FileArchive, Archive, Rows, ThumbsUp } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import PlatformSelector from '@/components/PlatformSelector';
+import PostCard from '@/components/PostCard';
+import { mockData } from '@/data/mockData';
+import { Search, ListFilter, Grid, List, Filter } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
-// Sample content categories data
-const contentCategories = [
-  { 
-    id: '1', 
-    name: 'Content without a category',
-    description: 'Content that hasn\'t been saved in a category.',
-    active: true,
-    postsCount: 0
-  },
-  { 
-    id: '2', 
-    name: 'Curated',
-    description: 'Add 3rd party content you find, or connect some RSS Feeds. This content shows you know your stuff.',
-    active: true,
-    postsCount: 0
-  },
-  { 
-    id: '3', 
-    name: 'Engaging Posts',
-    description: 'Posts that help generate engagement on you socials. Share inspirational or fun quotes from your industry.',
-    active: true,
-    postsCount: 0
-  },
-  { 
-    id: '4', 
-    name: 'Our Blogs and Videos',
-    description: 'Share your own content - any blog posts (you can even connect them via RSS) you publish.',
-    active: true,
-    postsCount: 0
-  },
-  { 
-    id: '5', 
-    name: 'Promotional',
-    description: 'Use this category to promote your services/products. Make sure to include Calls To Action.',
-    active: true,
-    postsCount: 0
-  }
-];
+export default function Content() {
+  const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
+  const [showFilterDialog, setShowFilterDialog] = useState(false);
+  const [sortBy, setSortBy] = useState('date');
+  const { toast } = useToast();
 
-// Content tab components
-interface CategoryCardProps {
-  category: {
-    id: string;
-    name: string;
-    description: string;
-    active: boolean;
-    postsCount: number;
+  const filteredPosts = mockData.posts.filter(post => {
+    const matchesPlatform = selectedPlatform === 'all' 
+      ? true 
+      : post.platforms.includes(selectedPlatform);
+    
+    const matchesStatus = statusFilter === 'all' 
+      ? true 
+      : post.status === statusFilter;
+    
+    const matchesSearch = searchQuery === '' 
+      ? true 
+      : post.content.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesPlatform && matchesStatus && matchesSearch;
+  });
+
+  const sortedPosts = [...filteredPosts].sort((a, b) => {
+    if (sortBy === 'date') {
+      const dateA = a.scheduledDate ? new Date(a.scheduledDate) : new Date(0);
+      const dateB = b.scheduledDate ? new Date(b.scheduledDate) : new Date(0);
+      return dateB.getTime() - dateA.getTime();
+    }
+    if (sortBy === 'engagement' && a.engagement && b.engagement) {
+      const engA = a.engagement.likes + a.engagement.comments + a.engagement.shares;
+      const engB = b.engagement.likes + b.engagement.comments + b.engagement.shares;
+      return engB - engA;
+    }
+    return 0;
+  });
+
+  const handleEditPost = (post: any) => {
+    setSelectedPost(post);
   };
+
+  const handleDeletePost = (postId: string) => {
+    toast({
+      title: "Post deleted",
+      description: "The post has been successfully deleted.",
+    });
+  };
+
+  const handleDuplicatePost = (post: any) => {
+    toast({
+      title: "Post duplicated",
+      description: "The post has been duplicated and added to drafts.",
+    });
+  };
+
+  return (
+    <><div className='pl-5 pr-3'>
+      <PageHeader 
+        title="Content" 
+        description="Manage all your social media content in one place"
+        showNewPostButton
+      />
+
+      <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start ">
+        <div className="w-full flex-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder="Search content..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+        
+        <div className="flex gap-2 w-full sm:w-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <ListFilter className="h-4 w-4" />
+                Sort
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setSortBy('date')}>
+                Date {sortBy === 'date' && '✓'}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('engagement')}>
+                Engagement {sortBy === 'engagement' && '✓'}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={() => setShowFilterDialog(true)}
+          >
+            <Filter className="h-4 w-4" />
+            Filter
+          </Button>
+          
+          <div className="border rounded-md flex">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "rounded-none",
+                viewMode === 'grid' && "bg-accent"
+              )}
+              onClick={() => setViewMode('grid')}
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "rounded-none",
+                viewMode === 'list' && "bg-accent"
+              )}
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <PlatformSelector
+          selectedPlatform={selectedPlatform}
+          onSelect={setSelectedPlatform}
+        />
+      </div>
+
+      {sortedPosts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="rounded-full bg-gray-100 p-4 mb-4">
+            <FileSearch className="h-10 w-10 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900">No posts found</h3>
+          <p className="text-sm text-gray-500 max-w-md mt-1">
+            We couldn't find any posts that match your current filters. Try adjusting your search or filters.
+          </p>
+        </div>
+      ) : (
+        <div className={cn(
+          viewMode === 'grid' 
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" 
+            : "space-y-4"
+        )}>
+          {sortedPosts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              variant={viewMode === 'grid' ? 'default' : 'compact'}
+              onEdit={handleEditPost}
+              onDelete={handleDeletePost}
+              onDuplicate={handleDuplicatePost}
+            />
+          ))}
+        </div>
+      )}
+
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Filter Content</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Status</label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Platform</label>
+              <PlatformSelector
+                selectedPlatform={selectedPlatform}
+                onSelect={setSelectedPlatform}
+                className="flex-wrap gap-2"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setStatusFilter('all');
+                setSelectedPlatform('all');
+              }}
+            >
+              Reset
+            </Button>
+            <DialogClose asChild>
+              <Button>Apply Filters</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      </div>
+    </>
+  );
 }
 
-const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
+// This component is used in the empty state
+const FileSearch = ({ className, ...props }: any) => {
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-base">{category.name}</CardTitle>
-          <Button variant="ghost" size="sm">
-            <Trash className="h-4 w-4" />
-          </Button>
-        </div>
-        <CardDescription>{category.description}</CardDescription>
-      </CardHeader>
-      <CardContent className="pb-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Active</span>
-          <Switch checked={category.active} />
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between border-t pt-4">
-        <Button variant="outline" className="flex-1 mr-1 flex items-center justify-center">
-          <Eye className="h-4 w-4 mr-1" />
-          <span>View Posts ({category.postsCount})</span>
-        </Button>
-        <Button variant="outline" className="flex-1 ml-1 flex items-center justify-center">
-          <Pencil className="h-4 w-4 mr-1" />
-          <span>Edit Category</span>
-        </Button>
-      </CardFooter>
-    </Card>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={cn("lucide lucide-file-search", className)}
+      {...props}
+    >
+      <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v3" />
+      <path d="M14 2v6h6" />
+      <path d="M5 17a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+      <path d="m9 18-1.5-1.5" />
+    </svg>
   );
 };
-
-const Content: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('categories');
-
-  return (
-    <div>
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">Content Management</h1>
-          <p className="text-muted-foreground">Organize, create, and manage your social media content</p>
-        </div>
-        <Button className="flex items-center" size="sm">
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Create Category
-        </Button>
-      </div>
-      
-      <Tabs defaultValue="categories" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <div className="flex justify-between items-center">
-          <TabsList>
-            <TabsTrigger value="categories" className="flex items-center">
-              <FileText className="h-4 w-4 mr-2" />
-              <span>Categories</span>
-            </TabsTrigger>
-            <TabsTrigger value="hashtag" className="flex items-center">
-              <span className="font-semibold text-lg mr-1">#</span>
-              <span>Hashtag Collection</span>
-            </TabsTrigger>
-            <TabsTrigger value="import-csv" className="flex items-center">
-              <Import className="h-4 w-4 mr-2" />
-              <span>Import CSV</span>
-            </TabsTrigger>
-            <TabsTrigger value="import-links" className="flex items-center">
-              <Import className="h-4 w-4 mr-2" />
-              <span>Import Links</span>
-            </TabsTrigger>
-            <TabsTrigger value="import-media" className="flex items-center">
-              <Import className="h-4 w-4 mr-2" />
-              <span>Import Media</span>
-            </TabsTrigger>
-          </TabsList>
-        </div>
-        
-        <TabsContent value="categories" className="space-y-4">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Your content categories</h2>
-            <p className="text-muted-foreground">Content is king! And you'll feel the same once you start adding it to your categories.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {contentCategories.map((category) => (
-              <CategoryCard key={category.id} category={category} />
-            ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="hashtag" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Hashtag Collection</CardTitle>
-              <CardDescription>Organize and manage your hashtag groups for easy access</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium mb-2">New Hashtag Group</h3>
-                  <div className="flex gap-2">
-                    <Input placeholder="Group name" className="flex-1" />
-                    <Button>Create</Button>
-                  </div>
-                </div>
-                <div className="border rounded-lg p-4 text-center text-muted-foreground">
-                  <p>You don't have any hashtag groups yet</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="import-csv" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Import CSV</CardTitle>
-              <CardDescription>Import posts in bulk from a CSV file</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                <FileArchive className="h-12 w-12 mx-auto text-muted-foreground" />
-                <p className="mt-2 text-muted-foreground">Drag and drop your CSV file here or</p>
-                <Button className="mt-4">Browse Files</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="import-links">
-          <Card>
-            <CardHeader>
-              <CardTitle>Import links</CardTitle>
-              <CardDescription>Turn a dozen links into a dozen posts by quickly importing them to your account.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm font-medium mb-2">Please choose the social profiles you want to share on.</p>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm">Select All</Button>
-                  <Button variant="outline" size="sm">Select None</Button>
-                </div>
-              </div>
-              
-              <div className="border rounded-lg p-6">
-                <Button className="w-full flex items-center justify-center" variant="secondary">
-                  <Import className="mr-2 h-4 w-4" />
-                  Import links
-                </Button>
-                
-                <div className="mt-6 space-y-4">
-                  <div>
-                    <p className="text-sm font-medium mb-2">Links (one per line)</p>
-                    <Textarea placeholder="Paste your links here, one per line" className="h-40" />
-                  </div>
-                </div>
-                
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <p className="text-sm font-medium mb-2">Category</p>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {contentCategories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-medium mb-2">Append Text</p>
-                    <Input placeholder="Append text" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="import-media">
-          <Card>
-            <CardHeader>
-              <CardTitle>Import Media</CardTitle>
-              <CardDescription>Bulk upload images and videos for your social media posts</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                <Archive className="h-12 w-12 mx-auto text-muted-foreground" />
-                <p className="mt-2 text-muted-foreground">Drag and drop media files here or</p>
-                <Button className="mt-4">Browse Files</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-};
-
-export default Content;

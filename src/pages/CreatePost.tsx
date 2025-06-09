@@ -54,8 +54,12 @@ const CreatePost: React.FC = () => {
   const [postNow, setPostNow] = useState(true);
   const [activeRightTab, setActiveRightTab] = useState('preview');
 
-  return (
-    <div className="flex flex-col h-full">
+  return (<>
+    <div className="border-b bg-white flex items-center justify-between pl-2 pr-2 h-12">
+        <h1 className="text-2xl font-bold pl-4">Create Post</h1>
+      </div>
+    <div className="flex flex-col h-full pl-4 pr-3">
+      
       <div className="flex items-center justify-between border-b pb-4 mb-6">
         <div className="flex space-x-4 border-b-2 border-transparent">
           <Button 
@@ -289,6 +293,7 @@ const CreatePost: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
