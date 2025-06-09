@@ -114,12 +114,12 @@ const SideNav = () => {
               <Link
                 to={item.path}
                 className={cn(
-                  "flex items-center px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors",
+                  "flex items-center px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors font-semibold",
                   location.pathname === item.path && "bg-gray-100 text-black"
                 )}
               >
                 <span className="flex-shrink-0">{item.icon}</span>
-                {isOpen && <span className="ml-3 text-sm">{item.label}</span>}
+                {isOpen && <span className="ml-3 text-sm font-bold">{item.label}</span>}
               </Link>
             </li>
           ))}
@@ -133,8 +133,8 @@ const SideNav = () => {
           </div>
           {isOpen && (
             <div className="ml-3">
-              <p className="text-sm font-medium text-black">User Name</p>
-              <p className="text-xs text-gray-500">Free Plan</p>
+              <p className="text-sm font-bold text-black">User Name</p>
+              <p className="text-xs text-gray-500 font-medium">Free Plan</p>
             </div>
           )}
         </div>

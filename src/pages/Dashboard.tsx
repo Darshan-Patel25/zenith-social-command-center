@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import SocialIcon from '@/components/common/SocialIcon';
+import { SocialPlatform } from '@/types';
 
 // Sample data for performance overview chart - matching the image
 const performanceData = [
@@ -48,19 +49,19 @@ const upcomingPosts = [
     id: '1',
     content: 'Exciting news coming soon! Stay tuned for our latest product announcement! #exciting #newproduct',
     scheduledDate: new Date(Date.now() + 1000 * 60 * 60 * 2),
-    platforms: ['facebook', 'twitter', 'linkedin'],
+    platforms: ['facebook' as SocialPlatform, 'twitter' as SocialPlatform, 'linkedin' as SocialPlatform],
   },
   {
     id: '2',
     content: 'Check out our latest blog post on social media strategies for 2025! Link in bio.',
     scheduledDate: new Date(Date.now() + 1000 * 60 * 60 * 5),
-    platforms: ['instagram', 'facebook'],
+    platforms: ['instagram' as SocialPlatform, 'facebook' as SocialPlatform],
   },
   {
     id: '3',
     content: 'Watch our CEO\'s interview on the future of digital marketing. #digitalmarketing #interview',
     scheduledDate: new Date(Date.now() + 1000 * 60 * 60 * 24),
-    platforms: ['linkedin', 'twitter'],
+    platforms: ['linkedin' as SocialPlatform, 'twitter' as SocialPlatform],
   },
 ];
 

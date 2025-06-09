@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Check, MessageSquare, ThumbsUp, Share2, Search, Filter, ChevronDown } from 'lucide-react';
+import { Check, MessageSquare, ThumbsUp, Share2, Search, Filter, ChevronDown, Heart, Reply } from 'lucide-react';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
 
@@ -51,6 +51,8 @@ const engagementData = generateEngagementData();
 const Engagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedComment, setSelectedComment] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
   
   // Filter data based on active tab and search query
   const filteredData = engagementData.filter((item) => {
@@ -71,16 +73,30 @@ const Engagement: React.FC = () => {
   const getEngagementIcon = (type: string) => {
     switch (type) {
       case 'comment':
-        return <MessageSquare className="h-4 w-4" />;
+        return <MessageSquare className="h-4 w-4 text-blue-500" />;
       case 'like':
-        return <ThumbsUp className="h-4 w-4" />;
+        return <Heart className="h-4 w-4 text-red-500" />;
       case 'share':
-        return <Share2 className="h-4 w-4" />;
+        return <Share2 className="h-4 w-4 text-green-500" />;
       case 'mention':
-        return <MessageSquare className="h-4 w-4" />;
+        return <MessageSquare className="h-4 w-4 text-purple-500" />;
       default:
         return null;
     }
+  };
+
+  const platforms = [
+    { id: 'all', label: 'All Platforms', icon: null },
+    { id: 'instagram', label: 'Instagram', icon: 'instagram' as const },
+    { id: 'twitter', label: 'Twitter', icon: 'twitter' as const },
+    { id: 'facebook', label: 'Facebook', icon: 'facebook' as const },
+    { id: 'telegram', label: 'Telegram', icon: 'telegram' as const },
+  ];
+
+  const handleReplySubmit = (commentId: string) => {
+    console.log('Reply submitted for comment:', commentId, 'Reply:', replyText);
+    setReplyText('');
+    setSelectedComment(null);
   };
 
   return (
@@ -88,20 +104,47 @@ const Engagement: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Engagement</h1>
-          <p className="text-muted-foreground">Manage all interactions with your social media posts</p>
+          <p className="text-muted-foreground">Respond to comments and messages across your social platforms</p>
         </div>
+      </div>
+
+      {/* Platform Filter Buttons */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {platforms.map((platform) => (
+          <Button
+            key={platform.id}
+            variant={activeTab === platform.id ? "default" : "outline"}
+            className={`gap-2 ${
+              activeTab === platform.id 
+                ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                : "border-gray-200 hover:bg-gray-50"
+            }`}
+            onClick={() => setActiveTab(platform.id)}
+          >
+            {platform.icon && <SocialIcon platform={platform.icon} size={16} />}
+            <span>{platform.label}</span>
+          </Button>
+        ))}
       </div>
       
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Comments, Likes, Shares & Mentions</CardTitle>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Comments</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                {filteredData.filter(item => item.type === 'comment').length} comments
+              </p>
+            </div>
+            <Button variant="outline" size="sm">Mark All Read</Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div className="relative w-full sm:max-w-xs">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search engagements..."
+                placeholder="Search comments..."
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -118,57 +161,18 @@ const Engagement: React.FC = () => {
                   <SelectItem value="oldest">Oldest First</SelectItem>
                 </SelectContent>
               </Select>
-              
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                <span>Filter</span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
             </div>
           </div>
           
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="all" className="flex gap-2">
-                All
-                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                  {engagementData.length}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="comment" className="flex gap-2">
-                Comments
-                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                  {engagementData.filter(item => item.type === 'comment').length}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="like" className="flex gap-2">
-                Likes
-                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                  {engagementData.filter(item => item.type === 'like').length}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="share" className="flex gap-2">
-                Shares
-                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                  {engagementData.filter(item => item.type === 'share').length}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="mention" className="flex gap-2">
-                Mentions
-                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                  {engagementData.filter(item => item.type === 'mention').length}
-                </span>
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value={activeTab} className="space-y-4">
-              {filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <div
-                    key={item.id}
-                    className="border rounded-lg p-4 flex flex-col sm:flex-row gap-4"
-                  >
-                    <div className="sm:w-14 flex sm:flex-col items-center sm:items-start gap-2">
+          <div className="space-y-4">
+            {filteredData.length > 0 ? (
+              filteredData.map((item) => (
+                <div
+                  key={item.id}
+                  className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center gap-2">
                       <div className="p-2 bg-gray-100 rounded-full">
                         {getEngagementIcon(item.type)}
                       </div>
@@ -176,20 +180,37 @@ const Engagement: React.FC = () => {
                     </div>
                     
                     <div className="flex-1">
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between mb-2">
                         <div>
-                          <div className="flex items-center">
-                            <span className="font-medium">{item.username}</span>
-                            <span className="ml-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm">{item.username}</span>
+                            <span className="text-xs text-muted-foreground">
                               {formatDate(item.date)}
                             </span>
                           </div>
-                          <p className="text-sm mt-1">
-                            {item.content || `${capitalizeFirstLetter(item.type)}d your post`}
-                          </p>
+                          {item.content && (
+                            <p className="text-sm mt-1 text-gray-700">
+                              {item.content}
+                            </p>
+                          )}
+                          {!item.content && (
+                            <p className="text-sm mt-1 text-gray-500 italic">
+                              {capitalizeFirstLetter(item.type)}d your post
+                            </p>
+                          )}
                         </div>
                         
-                        <div>
+                        <div className="flex items-center gap-2">
+                          {item.type === 'comment' && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setSelectedComment(selectedComment === item.id ? null : item.id)}
+                            >
+                              <Reply className="h-4 w-4 mr-1" />
+                              Reply
+                            </Button>
+                          )}
                           <Button 
                             variant="outline" 
                             size="sm" 
@@ -207,24 +228,50 @@ const Engagement: React.FC = () => {
                         </div>
                       </div>
                       
-                      {item.type === 'comment' && (
-                        <div className="mt-3">
-                          <Input placeholder="Write a reply..." className="text-sm" />
-                          <div className="flex justify-end mt-2">
-                            <Button size="sm">Reply</Button>
+                      {selectedComment === item.id && item.type === 'comment' && (
+                        <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                              <span className="text-blue-600 font-semibold text-xs">U</span>
+                            </div>
+                            <div className="flex-1">
+                              <Input 
+                                placeholder="Write a reply..." 
+                                className="text-sm mb-2" 
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                              />
+                              <div className="flex justify-end gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => setSelectedComment(null)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  size="sm"
+                                  onClick={() => handleReplySubmit(item.id)}
+                                  disabled={!replyText.trim()}
+                                >
+                                  Send Reply
+                                </Button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No engagements found</p>
                 </div>
-              )}
-            </TabsContent>
-          </Tabs>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p className="text-muted-foreground">No engagements found</p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -240,11 +287,11 @@ const formatDate = (date: Date): string => {
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   
   if (diffMins < 60) {
-    return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    return `${diffMins}m ago`;
   } else if (diffHours < 24) {
-    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    return `${diffHours}h ago`;
   } else {
-    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    return `${diffDays}d ago`;
   }
 };
 

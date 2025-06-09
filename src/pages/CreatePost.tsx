@@ -45,8 +45,7 @@ import {
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
-
-const platforms: SocialPlatform[] = ['facebook', 'twitter', 'linkedin', 'instagram', 'tiktok'];
+import PlatformSelector from '@/components/post/PlatformSelector';
 
 const CreatePost: React.FC = () => {
   const [activeTab, setActiveTab] = useState('create');
@@ -54,14 +53,6 @@ const CreatePost: React.FC = () => {
   const [postContent, setPostContent] = useState('');
   const [postNow, setPostNow] = useState(true);
   const [activeRightTab, setActiveRightTab] = useState('preview');
-
-  const togglePlatform = (platform: SocialPlatform) => {
-    if (selectedPlatforms.includes(platform)) {
-      setSelectedPlatforms(selectedPlatforms.filter(p => p !== platform));
-    } else {
-      setSelectedPlatforms([...selectedPlatforms, platform]);
-    }
-  };
 
   return (
     <div className="flex flex-col h-full">
@@ -97,6 +88,15 @@ const CreatePost: React.FC = () => {
             <X className="h-5 w-5" />
           </Button>
         </div>
+      </div>
+
+      {/* Platform Selector */}
+      <div className="mb-6">
+        <Label className="text-sm font-medium mb-2 block">Select Platforms</Label>
+        <PlatformSelector
+          selectedPlatforms={selectedPlatforms}
+          onPlatformsChange={setSelectedPlatforms}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow">
