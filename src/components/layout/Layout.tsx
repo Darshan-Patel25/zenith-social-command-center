@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import SideNav from './SideNav';
 import Header from './Header';
@@ -27,7 +28,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const path = location.pathname;
     
     if (path === '/') return 'Dashboard';
-    if (path === '/content') return 'Content Management';
     if (path === '/create-post') return 'Create Post';
     if (path === '/schedule') return 'Schedule Posts';
     if (path === '/analytics') return 'Analytics';

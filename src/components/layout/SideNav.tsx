@@ -52,11 +52,6 @@ const SideNav = () => {
       path: '/',
     },
     {
-      icon: <PenLine className="w-5 h-5" />,
-      label: 'Content',
-      path: '/content',
-    },
-    {
       icon: <Send className="w-5 h-5" />,
       label: 'Create Post',
       path: '/create-post',
