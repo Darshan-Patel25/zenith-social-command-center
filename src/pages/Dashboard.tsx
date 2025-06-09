@@ -1,221 +1,148 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { 
+  Layout, 
+  BarChart3, 
   Users, 
-  FileText, 
+  MessageSquare, 
   Share, 
-  Eye,
   Plus,
-  Bell,
-  TrendingUp
+  Calendar
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import UpcomingPosts from '@/components/dashboard/UpcomingPosts';
+import MetricCard from '@/components/common/MetricCard';
 import PlatformStats from '@/components/dashboard/PlatformStats';
+import UpcomingPosts from '@/components/dashboard/UpcomingPosts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-// Sample data for performance chart
-const performanceData = [
-  { date: '06/02', engagement: 2.1, reach: 85, followers: 245 },
-  { date: '06/03', engagement: 2.5, reach: 95, followers: 248 },
-  { date: '06/04', engagement: 2.2, reach: 88, followers: 250 },
-  { date: '06/05', engagement: 2.8, reach: 102, followers: 255 },
-  { date: '06/06', engagement: 2.4, reach: 92, followers: 258 },
-  { date: '06/07', engagement: 2.6, reach: 98, followers: 260 },
-  { date: '06/08', engagement: 2.7, reach: 105, followers: 262 },
-];
-
-// Sample data for platform performance bar chart
-const platformBarData = [
-  { platform: 'Instagram', engagement: 4.2, posts: 180 },
-  { platform: 'Facebook', engagement: 3.1, posts: 95 },
-  { platform: 'Twitter', engagement: 2.8, posts: 45 },
-  { platform: 'Telegram', engagement: 1.9, posts: 15 },
+// Sample data for post type chart
+const postTypeData = [
+  { name: 'Mon', image: 4, text: 2, video: 1 },
+  { name: 'Tue', image: 3, text: 1, video: 2 },
+  { name: 'Wed', image: 5, text: 3, video: 1 },
+  { name: 'Thu', image: 2, text: 4, video: 0 },
+  { name: 'Fri', image: 3, text: 2, video: 1 },
+  { name: 'Sat', image: 1, text: 1, video: 0 },
+  { name: 'Sun', image: 2, text: 0, video: 0 },
 ];
 
 const Dashboard: React.FC = () => {
-  const [timeRange, setTimeRange] = useState('30');
-
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">Overview of your social media performance</p>
-        </div>
+        <h1 className="text-2xl font-bold">Welcome to Zenith</h1>
         
-        <div className="flex gap-2">
-          <Button variant="ghost" size="icon">
-            <Bell className="w-4 h-4" />
-          </Button>
-          <Button asChild className="gap-2 bg-blue-600 hover:bg-blue-700">
+        <div className="flex flex-wrap gap-2">
+          <Button asChild className="gap-2">
             <Link to="/create-post">
               <Plus className="w-4 h-4" />
-              <span>New Post</span>
+              <span>Create Post</span>
+            </Link>
+          </Button>
+          <Button variant="outline" asChild className="gap-2">
+            <Link to="/schedule">
+              <Calendar className="w-4 h-4" />
+              <span>Schedule</span>
             </Link>
           </Button>
         </div>
       </div>
       
-      {/* Metrics Cards */}
+      {/* Quick stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Followers</p>
-                <p className="text-2xl font-bold">24,500</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Posts</p>
-                <p className="text-2xl font-bold">342</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Share className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Engagement</p>
-                <p className="text-2xl font-bold">3.7%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Eye className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Reach</p>
-                <p className="text-2xl font-bold">86.0K</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <MetricCard
+          title="Total Posts"
+          value="148"
+          icon={<Layout className="w-5 h-5 text-white" />}
+          change={5.2}
+          iconClassName="bg-blue-500 bg-opacity-20"
+        />
+        <MetricCard
+          title="Followers"
+          value="24,856"
+          icon={<Users className="w-5 h-5 text-white" />}
+          change={2.4}
+          iconClassName="bg-green-500 bg-opacity-20"
+        />
+        <MetricCard
+          title="Engagement"
+          value="3,249"
+          icon={<MessageSquare className="w-5 h-5 text-white" />}
+          change={-1.8}
+          iconClassName="bg-purple-500 bg-opacity-20"
+        />
+        <MetricCard
+          title="Shares"
+          value="867"
+          icon={<Share className="w-5 h-5 text-white" />}
+          change={8.1}
+          iconClassName="bg-orange-500 bg-opacity-20"
+        />
       </div>
       
-      {/* Charts Section */}
+      {/* Platform stats */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Performance Overview */}
-        <Card className="xl:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Performance Overview</CardTitle>
-            <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">7 days</SelectItem>
-                <SelectItem value="30">30 days</SelectItem>
-                <SelectItem value="90">90 days</SelectItem>
-              </SelectContent>
-            </Select>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={performanceData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 12 }} 
-                    tickLine={false} 
-                    axisLine={false} 
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }} 
-                    tickLine={false} 
-                    axisLine={false} 
-                  />
-                  <Tooltip />
-                  <Line 
-                    type="monotone" 
-                    dataKey="engagement" 
-                    stroke="#8b5cf6" 
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    name="Engagement %"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="reach" 
-                    stroke="#10b981" 
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    name="Reach (K)"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="followers" 
-                    stroke="#f59e0b" 
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    name="Followers (x100)"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Platform Performance */}
+        <PlatformStats />
+        <UpcomingPosts />
+      </div>
+      
+      {/* Content type breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Platform Performance</CardTitle>
+            <CardTitle>Post Type Distribution</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={platformBarData} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 12 }} />
-                  <YAxis 
-                    type="category" 
-                    dataKey="platform" 
-                    tick={{ fontSize: 12 }} 
-                    width={80}
-                  />
+                <BarChart
+                  data={postTypeData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
                   <Tooltip />
-                  <Bar dataKey="engagement" fill="#8b5cf6" name="Engagement %" />
-                  <Bar dataKey="posts" fill="#10b981" name="Posts" />
+                  <Bar dataKey="image" stackId="a" fill="#8884d8" name="Image Posts" />
+                  <Bar dataKey="text" stackId="a" fill="#82ca9d" name="Text Posts" />
+                  <Bar dataKey="video" stackId="a" fill="#ffc658" name="Video Posts" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 pb-4 border-b last:border-0 last:pb-0">
+                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center shrink-0">
+                    {i % 3 === 0 && <Users className="w-5 h-5 text-blue-500" />}
+                    {i % 3 === 1 && <MessageSquare className="w-5 h-5 text-green-500" />}
+                    {i % 3 === 2 && <Share className="w-5 h-5 text-purple-500" />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">
+                      {i % 3 === 0 && 'New follower on Twitter'}
+                      {i % 3 === 1 && 'New comment on your LinkedIn post'}
+                      {i % 3 === 2 && 'Your Facebook post was shared'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {30 - i * 5} minutes ago
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
-      
-      {/* Additional Platform Stats */}
-      <PlatformStats />
-      
-      {/* Upcoming Posts */}
-      <UpcomingPosts />
     </div>
   );
 };
