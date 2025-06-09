@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   return (
     <div className="border-b bg-white flex items-center justify-between p-4">
       <div>
-        <h1 className="text-xl font-bold">{displayTitle}</h1>
+        <h1 className="text-xl font-bold pl-4">{displayTitle}</h1>
       </div>
       
       <div className="flex items-center space-x-4">

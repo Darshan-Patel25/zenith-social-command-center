@@ -1,18 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  PenLine, 
-  Calendar, 
-  BarChart3, 
-  MessageCircle, 
-  UserCircle, 
-  Settings,
+import {
+  LayoutDashboard,
   Send,
+  Calendar,
+  BarChart3,
+  MessageCircle,
+  UserCircle,
+  Settings,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -20,126 +18,111 @@ import { Button } from '@/components/ui/button';
 const SideNav = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
-  
-  // Check window width on mount and resize
+
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setIsOpen(false);
-      } else {
-        setIsOpen(true);
-      }
+      setIsOpen(window.innerWidth >= 1024);
     };
-    
-    // Set initial state
     handleResize();
-    
-    // Add event listener
     window.addEventListener('resize', handleResize);
-    
-    // Cleanup
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
-  
+
+  const toggleSidebar = () => setIsOpen(!isOpen);
+
   const navItems = [
-    {
-      icon: <LayoutDashboard className="w-5 h-5" />,
-      label: 'Dashboard',
-      path: '/',
-    },
-    {
-      icon: <Send className="w-5 h-5" />,
-      label: 'Create Post',
-      path: '/create-post',
-    },
-    {
-      icon: <Calendar className="w-5 h-5" />,
-      label: 'Schedule',
-      path: '/schedule',
-    },
-    {
-      icon: <BarChart3 className="w-5 h-5" />,
-      label: 'Analytics',
-      path: '/analytics',
-    },
-    {
-      icon: <MessageCircle className="w-5 h-5" />,
-      label: 'Engagement',
-      path: '/engagement',
-    },
-    {
-      icon: <UserCircle className="w-5 h-5" />,
-      label: 'Profile',
-      path: '/profile',
-    },
-    {
-      icon: <Settings className="w-5 h-5" />,
-      label: 'Settings',
-      path: '/settings',
-    },
+    { icon: <LayoutDashboard className="w-5 h-5" />, label: 'Dashboard', path: '/' },
+    { icon: <Send className="w-5 h-5" />, label: 'Create Post', path: '/create-post' },
+    { icon: <Calendar className="w-5 h-5" />, label: 'Schedule', path: '/schedule' },
+    { icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics', path: '/analytics' },
+    { icon: <MessageCircle className="w-5 h-5" />, label: 'Engagement', path: '/engagement' },
+    { icon: <UserCircle className="w-5 h-5" />, label: 'Profile', path: '/profile' },
+    { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: '/settings' },
   ];
 
   return (
-    <div className={cn(
-      "h-screen fixed left-0 top-0 bg-white flex flex-col border-r border-gray-200 transition-all duration-300",
-      isOpen ? "w-52" : "w-16"
-    )}>
-      <div className="p-4 flex items-center justify-between mb-6">
-        <div className="flex items-center relative w-full">
-          <Link to="/" className="flex items-center">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold">T</span>
-            </div>
-            {isOpen && <h1 className="ml-2 text-xl font-bold text-black">Trendlyzer</h1>}
-          </Link>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="text-gray-600 hover:text-black p-0 h-8 w-8 absolute right-0"
-            onClick={toggleSidebar}
-          >
-            {isOpen ? <Menu className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-          </Button>
-        </div>
+    <aside
+      className={cn(
+        'fixed top-0 left-0 h-screen bg-white border-r border-gray-200 shadow-lg flex flex-col transition-width duration-300',
+        isOpen ? 'w-56' : 'w-16'
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <Link
+          to="/"
+          className={cn(
+            'flex items-center gap-3',
+            isOpen ? 'justify-start' : 'justify-center w-full'
+          )}
+        >
+          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold select-none text-lg">T</span>
+          </div>
+          {isOpen && <h1 className="text-xl font-semibold text-gray-900 select-none">Trendlyzer</h1>}
+        </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-gray-600 hover:text-gray-900 focus-visible:ring-2 focus-visible:ring-blue-500 p-1 rounded-md"
+          onClick={toggleSidebar}
+          aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+        >
+          {isOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+        </Button>
       </div>
-      
-      <nav className="flex-1 overflow-y-auto">
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto mt-3">
         <ul className="flex flex-col space-y-1 px-2">
-          {navItems.map((item, index) => (
-            <li key={index}>
-              <Link
-                to={item.path}
-                className={cn(
-                  "flex items-center px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors font-semibold",
-                  location.pathname === item.path && "bg-gray-100 text-black"
-                )}
-              >
-                <span className="flex-shrink-0">{item.icon}</span>
-                {isOpen && <span className="ml-3 text-sm font-bold">{item.label}</span>}
-              </Link>
-            </li>
-          ))}
+          {navItems.map(({ icon, label, path }, idx) => {
+            const isActive = location.pathname === path;
+            return (
+              <li key={idx}>
+                <Link
+                  to={path}
+                  className={cn(
+                    'group flex items-center gap-4 rounded-md px-3 py-2 font-semibold transition-colors',
+                    isActive
+                      ? 'bg-blue-100 text-blue-700 shadow-inner'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  )}
+                  title={label}
+                >
+                  <span
+                    className={cn(
+                      'flex-shrink-0 transition-colors duration-200',
+                      isActive ? 'text-blue-700' : 'text-gray-600 group-hover:text-gray-900'
+                    )}
+                  >
+                    {icon}
+                  </span>
+                  {isOpen && <span className="text-sm">{label}</span>}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
-      
-      <div className="p-4 mt-auto">
-        <div className={cn("flex items-center", !isOpen && "justify-center")}>
-          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-            <span className="text-white font-bold">U</span>
-          </div>
-          {isOpen && (
-            <div className="ml-3">
-              <p className="text-sm font-bold text-black">User Name</p>
-              <p className="text-xs text-gray-500 font-medium">Free Plan</p>
-            </div>
-          )}
+
+      {/* User info */}
+      <div
+        className={cn(
+          'p-4 border-t border-gray-200 flex items-center gap-3',
+          isOpen ? 'justify-start' : 'justify-center'
+        )}
+      >
+        <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center select-none">
+          <span className="text-white font-bold text-lg">U</span>
         </div>
+        {isOpen && (
+          <div className="flex flex-col">
+            <p className="text-gray-900 font-semibold leading-tight truncate">User Name</p>
+            <p className="text-xs text-gray-500 font-medium">Free Plan</p>
+          </div>
+        )}
       </div>
-    </div>
+    </aside>
   );
 };
 

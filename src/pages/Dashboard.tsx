@@ -1,27 +1,37 @@
-
 import React, { useState } from 'react';
-import { 
-  Users, 
-  FileText, 
-  Share, 
+import {
+  Users,
+  FileText,
+  Share,
   Clock,
   Bell,
   Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend
+} from 'recharts';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
+import UpcomingPosts from '@/components/dashboard/UpcomingPosts';
 
-// Sample data for performance overview chart
 const performanceData = [
   { date: '06/03', engagement: 90, reach: 95, followers: 260 },
   { date: '06/04', engagement: 88, reach: 98, followers: 258 },
@@ -32,7 +42,6 @@ const performanceData = [
   { date: '06/09', engagement: 93, reach: 115, followers: 260 },
 ];
 
-// Sample data for platform performance chart
 const platformData = [
   { platform: 'Instagram', engagement: 45, posts: 200 },
   { platform: 'Facebook', engagement: 35, posts: 120 },
@@ -42,13 +51,14 @@ const platformData = [
 
 const Dashboard: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const [timeframe, setTimeframe] = useState('30d');
 
   const platforms = [
     { id: 'all', label: 'All Platforms', icon: null },
-    { id: 'instagram', label: 'Instagram', icon: 'instagram' as const },
-    { id: 'twitter', label: 'Twitter', icon: 'twitter' as const },
-    { id: 'facebook', label: 'Facebook', icon: 'facebook' as const },
-    { id: 'telegram', label: 'Telegram', icon: 'telegram' as const },
+    { id: 'instagram', label: 'Instagram', icon: 'instagram' as SocialPlatform },
+    { id: 'twitter', label: 'Twitter', icon: 'twitter' as SocialPlatform },
+    { id: 'facebook', label: 'Facebook', icon: 'facebook' as SocialPlatform },
+    { id: 'telegram', label: 'Telegram', icon: 'telegram' as SocialPlatform },
   ];
 
   return (
@@ -59,7 +69,7 @@ const Dashboard: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600">Overview of your social media performance</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="text-gray-600">
             <Bell className="w-4 h-4" />
@@ -71,17 +81,16 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Platform Filter Buttons */}
+      {/* Platform Filter */}
       <div className="flex flex-wrap gap-2">
         {platforms.map((platform) => (
           <Button
             key={platform.id}
             variant={selectedPlatform === platform.id ? "default" : "outline"}
-            className={`gap-2 ${
-              selectedPlatform === platform.id 
-                ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-600" 
-                : "border-gray-200 hover:bg-gray-50 text-gray-700"
-            }`}
+            className={`gap-2 ${selectedPlatform === platform.id
+              ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+              : "border-gray-200 hover:bg-gray-50 text-gray-700"
+              }`}
             onClick={() => setSelectedPlatform(platform.id)}
           >
             {platform.icon && <SocialIcon platform={platform.icon} size={16} />}
@@ -89,8 +98,8 @@ const Dashboard: React.FC = () => {
           </Button>
         ))}
       </div>
-      
-      {/* Key Metrics Cards */}
+
+      {/* Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card className="bg-white border border-gray-200">
           <CardContent className="p-6">
@@ -148,135 +157,84 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-      
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Performance Overview Chart */}
-        <Card className="lg:col-span-2 bg-white border border-gray-200">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Performance Overview</h3>
-              <Select defaultValue="30days">
-                <SelectTrigger className="w-[120px] border-gray-200">
+
+      {/* Chart Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-lg">Performance Overview</CardTitle>
+              <Select value={timeframe} onValueChange={setTimeframe}>
+                <SelectTrigger className="w-28">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white border border-gray-200">
-                  <SelectItem value="7days">7 days</SelectItem>
-                  <SelectItem value="30days">30 days</SelectItem>
-                  <SelectItem value="90days">90 days</SelectItem>
+                <SelectContent>
+                  <SelectItem value="7d">7 days</SelectItem>
+                  <SelectItem value="30d">30 days</SelectItem>
+                  <SelectItem value="90d">90 days</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+          </CardHeader>
+          <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={performanceData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 12, fill: '#6b7280' }} 
-                    axisLine={false} 
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12, fill: '#6b7280' }} 
-                    axisLine={false} 
-                    tickLine={false}
-                    domain={[0, 280]}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'white', 
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="engagement" 
-                    stroke="#8b5cf6" 
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: '#8b5cf6' }}
-                    name="Engagement %"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="reach" 
-                    stroke="#10b981" 
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: '#10b981' }}
-                    name="Reach (K)"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="followers" 
-                    stroke="#f59e0b" 
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: '#f59e0b' }}
-                    name="Followers (x100)"
-                  />
+                <LineChart
+                  data={performanceData}
+                  margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="engagement" stroke="#8884d8" name="Engagement %" activeDot={{ r: 8 }} />
+                  <Line type="monotone" dataKey="reach" stroke="#82ca9d" name="Reach (K)" />
+                  <Line type="monotone" dataKey="followers" stroke="#ffc658" name="Followers (x100)" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </CardContent>
         </Card>
 
-        {/* Platform Performance Chart */}
-        <Card className="bg-white border border-gray-200">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Platform Performance</h3>
-            </div>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Platform Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                  data={platformData} 
-                  layout="horizontal"
-                  margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+                <BarChart
+                  data={platformData}
+                  layout="vertical"
+                  margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
-                  <XAxis 
-                    type="number" 
-                    domain={[0, 250]}
-                    tick={{ fontSize: 12, fill: '#6b7280' }} 
-                    axisLine={false} 
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    type="category" 
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis
+                    type="category"
                     dataKey="platform"
-                    tick={{ fontSize: 12, fill: '#6b7280' }} 
-                    axisLine={false} 
-                    tickLine={false}
-                    width={80}
+                    tickFormatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'white', 
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                    }}
-                  />
-                  <Bar 
-                    dataKey="engagement" 
-                    fill="#8b5cf6" 
-                    name="Engagement %"
-                    radius={[0, 4, 4, 0]}
-                  />
-                  <Bar 
-                    dataKey="posts" 
-                    fill="#10b981" 
-                    name="Posts"
-                    radius={[0, 4, 4, 0]}
-                  />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="engagement" name="Engagement %" fill="#8884d8" />
+                  <Bar dataKey="posts" name="Posts" fill="#82ca9d" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </CardContent>
         </Card>
+        
+
+
+      </div>
+      <div >
+        
+        <UpcomingPosts />
       </div>
     </div>
+    
   );
 };
 

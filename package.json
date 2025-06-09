@@ -78,6 +78,18 @@
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
-  }
+    "vite": "^5.4.19"
+  },
+  "description": "**URL**: https://lovable.dev/projects/93ce1337-39b0-4354-998f-894b04609407",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Darshan-Patel25/zenith-social-command-center.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Darshan-Patel25/zenith-social-command-center/issues"
+  },
+  "homepage": "https://github.com/Darshan-Patel25/zenith-social-command-center#readme"
 }
