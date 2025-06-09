@@ -30,7 +30,7 @@ const Profile: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('(201) 555-0123');
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pl-5 pr-3">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">My Profile</h1>

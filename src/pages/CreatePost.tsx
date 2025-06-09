@@ -55,7 +55,7 @@ const CreatePost: React.FC = () => {
   const [activeRightTab, setActiveRightTab] = useState('preview');
 
   return (<>
-    <div className="border-b bg-white flex items-center justify-between pl-2 pr-2 h-12">
+    <div className="border-b bg-white  items-center justify-between pl-2 pr-2 h-12">
         <h1 className="text-2xl font-bold pl-4">Create Post</h1>
       </div>
     <div className="flex flex-col h-full pl-4 pr-3">

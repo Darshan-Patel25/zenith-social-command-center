@@ -13,7 +13,7 @@ const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('workspace');
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pl-5 pr-3">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Settings</h1>

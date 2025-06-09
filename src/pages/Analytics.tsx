@@ -113,7 +113,10 @@ const Analytics: React.FC = () => {
   
   return (
     <>
-      <div className="space-y-6">
+    <div className="border-b bg-white  items-center justify-between pl-2 pr-2 h-12">
+        <h1 className="text-2xl font-bold pl-4">Analytics</h1>
+      </div>
+      <div className="space-y-6 pl-4 pt-3">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-semibold">{getPlatformDisplayName(selectedPlatform)} Analytics</h1>
