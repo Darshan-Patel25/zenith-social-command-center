@@ -247,7 +247,7 @@ export default function Engage() {
                           <Button variant="outline" onClick={() => setSelectedComment(null)}>
                             Cancel
                           </Button>
-                          <Button className="bg-zenith-600 hover:bg-zenith-700" onClick={() => handleReply(comment.id)}>
+                          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => handleReply(comment.id)}>
                             Send Reply
                           </Button>
                         </div>

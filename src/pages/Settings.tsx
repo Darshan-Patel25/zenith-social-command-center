@@ -87,7 +87,7 @@ const Settings: React.FC = () => {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="workspace-name">Workspace Name</Label>
-                <Input id="workspace-name" defaultValue="My Zenith Workspace" />
+                <Input id="workspace-name" defaultValue="My Trendlyzer Workspace" />
               </div>
               
               <div className="space-y-2">

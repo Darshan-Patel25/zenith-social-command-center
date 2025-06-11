@@ -5,7 +5,15 @@ import {
   Share,
   Clock,
   Bell,
-  Plus
+  Plus,
+  Twitter,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Calendar,
+  ImageIcon,
+  BarChart3,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,42 +24,77 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Legend
-} from 'recharts';
+import { cn } from '@/lib/utils';
+import { useNavigate, Link } from 'react-router-dom';
 import SocialIcon from '@/components/common/SocialIcon';
-import { SocialPlatform } from '@/types';
 import UpcomingPosts from '@/components/dashboard/UpcomingPosts';
+import { SocialPlatform } from '@/types';
 
-const performanceData = [
-  { date: '06/03', engagement: 90, reach: 95, followers: 260 },
-  { date: '06/04', engagement: 88, reach: 98, followers: 258 },
-  { date: '06/05', engagement: 85, reach: 102, followers: 256 },
-  { date: '06/06', engagement: 92, reach: 105, followers: 254 },
-  { date: '06/07', engagement: 89, reach: 108, followers: 256 },
-  { date: '06/08', engagement: 95, reach: 112, followers: 258 },
-  { date: '06/09', engagement: 93, reach: 115, followers: 260 },
+const connectedAccounts = [
+  {
+    platform: 'Twitter',
+    icon: Twitter,
+    username: '@yourbrand',
+    status: 'Connected',
+    color: 'bg-blue-500',
+  },
+  {
+    platform: 'Facebook',
+    icon: Facebook,
+    username: 'Your Brand',
+    status: 'Connected',
+    color: 'bg-blue-600',
+  },
+  {
+    platform: 'Instagram',
+    icon: Instagram,
+    username: '@yourbrand',
+    status: 'Connected',
+    color: 'bg-pink-500',
+  },
+  {
+    platform: 'LinkedIn',
+    icon: Linkedin,
+    username: 'Your Brand',
+    status: 'Not connected',
+    color: 'bg-blue-700',
+  },
 ];
 
-const platformData = [
-  { platform: 'Instagram', engagement: 45, posts: 200 },
-  { platform: 'Facebook', engagement: 35, posts: 120 },
-  { platform: 'Twitter', engagement: 25, posts: 50 },
-  { platform: 'Telegram', engagement: 15, posts: 30 },
+const quickActions = [
+  {
+    title: 'Schedule Post',
+    description: 'Create and schedule content for your accounts',
+    icon: Calendar,
+    href: '/content/create',
+    color: 'bg-blue-50 text-blue-600',
+  },
+  {
+    title: 'Content Library',
+    description: 'Upload and manage your media assets',
+    icon: ImageIcon,
+    href: '/content',
+    color: 'bg-green-50 text-green-600',
+  },
+  {
+    title: 'Analytics Report',
+    description: 'View insights about your social performance',
+    icon: BarChart3,
+    href: '/analytics',
+    color: 'bg-purple-50 text-purple-600',
+  },
+  {
+    title: 'Sync Accounts',
+    description: 'Refresh data from your connected platforms',
+    icon: RefreshCw,
+    href: '#',
+    color: 'bg-orange-50 text-orange-600',
+  },
 ];
 
 const Dashboard: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
-  const [timeframe, setTimeframe] = useState('30d');
+  const navigate = useNavigate();
 
   const platforms = [
     { id: 'all', label: 'All Platforms', icon: null },
@@ -69,12 +112,14 @@ const Dashboard: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600">Overview of your social media performance</p>
         </div>
-
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="text-gray-600">
             <Bell className="w-4 h-4" />
           </Button>
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+          <Button
+            className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => navigate('/create-post')}
+          >
             <Plus className="w-4 h-4" />
             New Post
           </Button>
@@ -86,11 +131,12 @@ const Dashboard: React.FC = () => {
         {platforms.map((platform) => (
           <Button
             key={platform.id}
-            variant={selectedPlatform === platform.id ? "default" : "outline"}
-            className={`gap-2 ${selectedPlatform === platform.id
-              ? "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
-              : "border-gray-200 hover:bg-gray-50 text-gray-700"
-              }`}
+            variant={selectedPlatform === platform.id ? 'default' : 'outline'}
+            className={`gap-2 ${
+              selectedPlatform === platform.id
+                ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600'
+                : 'border-gray-200 hover:bg-gray-50 text-gray-700'
+            }`}
             onClick={() => setSelectedPlatform(platform.id)}
           >
             {platform.icon && <SocialIcon platform={platform.icon} size={16} />}
@@ -99,142 +145,96 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Key Metrics */}
+      {/* Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Card className="bg-white border border-gray-200">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <Users className="w-6 h-6 text-blue-600" />
+        {[
+          { label: 'Followers', value: '24,500', Icon: Users, color: 'bg-blue-100', text: 'text-blue-600' },
+          { label: 'Posts', value: '342', Icon: FileText, color: 'bg-purple-100', text: 'text-purple-600' },
+          { label: 'Engagement', value: '3.7%', Icon: Share, color: 'bg-green-100', text: 'text-green-600' },
+          { label: 'Reach', value: '86.0K', Icon: Clock, color: 'bg-orange-100', text: 'text-orange-600' },
+        ].map(({ label, value, Icon, color, text }) => (
+          <Card key={label} className="bg-white border border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 ${color} rounded-full flex items-center justify-center`}>
+                  <Icon className={`w-6 h-6 ${text}`} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">{label}</p>
+                  <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Followers</p>
-                <h3 className="text-2xl font-bold text-gray-900">24,500</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-gray-200">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <FileText className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Posts</p>
-                <h3 className="text-2xl font-bold text-gray-900">342</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-gray-200">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <Share className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Engagement</p>
-                <h3 className="text-2xl font-bold text-gray-900">3.7%</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-gray-200">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <Clock className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Reach</p>
-                <h3 className="text-2xl font-bold text-gray-900">86.0K</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Chart Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-lg">Performance Overview</CardTitle>
-              <Select value={timeframe} onValueChange={setTimeframe}>
-                <SelectTrigger className="w-28">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="7d">7 days</SelectItem>
-                  <SelectItem value="30d">30 days</SelectItem>
-                  <SelectItem value="90d">90 days</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={performanceData}
-                  margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="engagement" stroke="#8884d8" name="Engagement %" activeDot={{ r: 8 }} />
-                  <Line type="monotone" dataKey="reach" stroke="#82ca9d" name="Reach (K)" />
-                  <Line type="monotone" dataKey="followers" stroke="#ffc658" name="Followers (x100)" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Connected Accounts */}
+      <Card className="lg:col-span-3">
+        <CardHeader className="pb-2">
+          <h2 className="text-xl font-semibold text-foreground">Connected Accounts</h2>
+          <p className="text-sm text-muted-foreground">Manage your social media accounts</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {connectedAccounts.map((account) => (
+              <Card key={account.platform} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6 text-center">
+                  <div className={cn('w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3', account.color)}>
+                    <account.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-medium text-foreground">{account.username}</h3>
+                  <p className={cn('text-sm mt-1', account.status === 'Connected' ? 'text-green-600' : 'text-muted-foreground')}>{account.status}</p>
+                </CardContent>
+              </Card>
+            ))}
+            <Card className="hover:shadow-md transition-shadow border-dashed">
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                  <Plus className="h-6 w-6 text-gray-500" />
+                </div>
+                <h3 className="font-medium text-foreground">Add Account</h3>
+                <p className="text-sm text-muted-foreground mt-1">Connect a new platform</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Platform Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={platformData}
-                  layout="vertical"
-                  margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis
-                    type="category"
-                    dataKey="platform"
-                    tickFormatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
-                  />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="engagement" name="Engagement %" fill="#8884d8" />
-                  <Bar dataKey="posts" name="Posts" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-        
+      {/* Quick Actions */}
+      <Card className="lg:col-span-3">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-foreground">Quick Actions</h2>
+            <Button variant="ghost" className="text-sm">View All</Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {quickActions.map((action) => (
+              <Card key={action.title} className="hover:shadow-md transition-shadow cursor-pointer group">
+                <Link to={action.href}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start space-x-4">
+                      <div className={cn("p-3 rounded-lg", action.color)}>
+                        <action.icon className="h-6 w-6" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">{action.title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{action.description}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Link>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-
-      </div>
-      <div >
-        
-        <UpcomingPosts />
-      </div>
+      {/* Upcoming Posts */}
+      <UpcomingPosts />
     </div>
-    
   );
 };
 

@@ -1,27 +1,46 @@
-
 import React, { useState } from 'react';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
 } from '@/components/ui/tabs';
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SocialPlatform } from '@/types';
 import SocialIcon from '@/components/common/SocialIcon';
 import MetricCard from '@/components/analytics/MetricCard';
 import AnalyticsChart from '@/components/analytics/AnalyticsChart';
 import EngagementTable from '@/components/analytics/EngagementTable';
 import PostPerformance from '@/components/analytics/PostPerformance';
-import { ChevronDown, Edit, Share, FileBarChart, BarChart3, Lightbulb } from 'lucide-react';
+import {
+  ChevronDown,
+  Edit,
+  Share,
+  FileBarChart,
+  BarChart3,
+  Lightbulb
+} from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend
+} from 'recharts';
+
 
 // Sample data for the charts
 const generateDates = (days = 30) => {
@@ -33,6 +52,23 @@ const generateDates = (days = 30) => {
   }
   return dates;
 };
+
+const performanceData = [
+  { date: '06/03', engagement: 90, reach: 95, followers: 260 },
+  { date: '06/04', engagement: 88, reach: 98, followers: 258 },
+  { date: '06/05', engagement: 85, reach: 102, followers: 256 },
+  { date: '06/06', engagement: 92, reach: 105, followers: 254 },
+  { date: '06/07', engagement: 89, reach: 108, followers: 256 },
+  { date: '06/08', engagement: 95, reach: 112, followers: 258 },
+  { date: '06/09', engagement: 93, reach: 115, followers: 260 },
+];
+
+const platformData = [
+  { platform: 'Instagram', engagement: 45, posts: 200 },
+  { platform: 'Facebook', engagement: 35, posts: 120 },
+  { platform: 'Twitter', engagement: 25, posts: 50 },
+  { platform: 'Telegram', engagement: 15, posts: 30 },
+];
 
 const dates = generateDates();
 
@@ -94,6 +130,8 @@ const generatePlatformData = (platform: SocialPlatform | 'all') => {
   };
 };
 
+
+
 const platformOptions: SocialPlatform[] = ['linkedin', 'facebook', 'twitter', 'instagram', 'youtube', 'tiktok'];
 
 const Analytics: React.FC = () => {
@@ -110,6 +148,7 @@ const Analytics: React.FC = () => {
   
   const formattedStartDate = `Mar 12, 2025`;
   const formattedEndDate = `Apr 10, 2025`;
+    const [timeframe, setTimeframe] = useState('30d');
   
   return (
     <>
@@ -228,146 +267,192 @@ const Analytics: React.FC = () => {
                 />
               </div>
               
-              <div className="space-y-6">
+              
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <Card className="lg:col-span-2">
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg">Performance Overview</CardTitle>
+                <Select value={timeframe} onValueChange={setTimeframe}>
+                  <SelectTrigger className="w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7d">7 days</SelectItem>
+                    <SelectItem value="30d">30 days</SelectItem>
+                    <SelectItem value="90d">90 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={performanceData}
+                    margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="engagement" stroke="#8884d8" name="Engagement %" activeDot={{ r: 8 }} />
+                    <Line type="monotone" dataKey="reach" stroke="#82ca9d" name="Reach (K)" />
+                    <Line type="monotone" dataKey="followers" stroke="#ffc658" name="Followers (x100)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Platform Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={platformData}
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis
+                      type="category"
+                      dataKey="platform"
+                      tickFormatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
+                    />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="engagement" name="Engagement %" fill="#8884d8" />
+                    <Bar dataKey="posts" name="Posts" fill="#82ca9d" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+
+
+        </div>
+                  
+                
+              </TabsContent>
+              
+              {/* Post Analytics Tab Content */}
+              <TabsContent value="post" className="space-y-6">
+                <h2 className="text-2xl font-bold mb-6">Post Performance Analysis</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <MetricCard 
+                    title="Average Engagement" 
+                    value={(Math.random() * 10).toFixed(2) + "%"} 
+                    trend={{ value: "+2.4%", period: "last 30 days" }}
+                  />
+                  <MetricCard 
+                    title="Top Post Reach" 
+                    value={(Math.random() * 10000).toFixed(0)}
+                    trend={{ value: "+18%", period: "last 30 days" }}
+                  />
+                  <MetricCard 
+                    title="Click-through Rate" 
+                    value={(Math.random() * 5).toFixed(2) + "%"}
+                    trend={{ value: "-0.5%", period: "last 30 days" }}
+                  />
+                  <MetricCard 
+                    title="Conversion Rate" 
+                    value={(Math.random() * 3).toFixed(2) + "%"}
+                    trend={{ value: "+0.8%", period: "last 30 days" }}
+                  />
+                </div>
+                
                 <AnalyticsChart 
-                  title="Publishing Trend" 
-                  description="Review publishing patterns of your post types over time"
-                  data={platformData.publishingTrend}
-                  type="line"
+                  title="Post Performance by Type" 
+                  description="Compare engagement across different post types"
+                  data={platformData.postPerformanceByType}
+                  type="bar"
+                  xAxisDataKey="type"
                   lines={[
-                    { dataKey: 'Text', color: '#4f46e5', name: 'Text' },
-                    { dataKey: 'Image', color: '#ec4899', name: 'Image' },
-                    { dataKey: 'Video', color: '#10b981', name: 'Video' },
-                    { dataKey: 'Article', color: '#f59e0b', name: 'Article' },
-                    { dataKey: 'Document', color: '#ef4444', name: 'Document' },
-                    { dataKey: 'Others', color: '#6b7280', name: 'Others' }
+                    { dataKey: 'engagement', color: '#4f46e5', name: 'Engagement' },
+                    { dataKey: 'reach', color: '#10b981', name: 'Reach' }
                   ]}
                 />
                 
-                <AnalyticsChart 
-                  title="Engagement Trend" 
-                  description="Measure engagement patterns through likes and comments over time"
-                  data={platformData.engagementTrend}
-                  type="line"
-                  lines={[
-                    { dataKey: 'Reactions', color: '#4f46e5', name: 'Reactions' },
-                    { dataKey: 'Comments', color: '#ec4899', name: 'Comments' }
-                  ]}
-                />
-              </div>
-            </TabsContent>
-            
-            {/* Post Analytics Tab Content */}
-            <TabsContent value="post" className="space-y-6">
-              <h2 className="text-2xl font-bold mb-6">Post Performance Analysis</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <MetricCard 
-                  title="Average Engagement" 
-                  value={(Math.random() * 10).toFixed(2) + "%"} 
-                  trend={{ value: "+2.4%", period: "last 30 days" }}
-                />
-                <MetricCard 
-                  title="Top Post Reach" 
-                  value={(Math.random() * 10000).toFixed(0)}
-                  trend={{ value: "+18%", period: "last 30 days" }}
-                />
-                <MetricCard 
-                  title="Click-through Rate" 
-                  value={(Math.random() * 5).toFixed(2) + "%"}
-                  trend={{ value: "-0.5%", period: "last 30 days" }}
-                />
-                <MetricCard 
-                  title="Conversion Rate" 
-                  value={(Math.random() * 3).toFixed(2) + "%"}
-                  trend={{ value: "+0.8%", period: "last 30 days" }}
-                />
-              </div>
-              
-              <AnalyticsChart 
-                title="Post Performance by Type" 
-                description="Compare engagement across different post types"
-                data={platformData.postPerformanceByType}
-                type="bar"
-                xAxisDataKey="type"
-                lines={[
-                  { dataKey: 'engagement', color: '#4f46e5', name: 'Engagement' },
-                  { dataKey: 'reach', color: '#10b981', name: 'Reach' }
-                ]}
-              />
-              
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold">Post History</h3>
-                <div className="bg-white rounded-lg shadow divide-y">
-                  {platformData.postHistory.map((post) => (
-                    <div key={post.id} className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <p className="text-sm text-gray-500">{post.date}</p>
-                          <p className="text-base">{post.content}</p>
-                        </div>
-                        <div className="flex space-x-4 text-sm">
-                          <div className="flex items-center">
-                            <span className="font-medium text-gray-700">{post.likes}</span>
-                            <span className="ml-1 text-gray-500">Likes</span>
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold">Post History</h3>
+                  <div className="bg-white rounded-lg shadow divide-y">
+                    {platformData.postHistory.map((post) => (
+                      <div key={post.id} className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <p className="text-sm text-gray-500">{post.date}</p>
+                            <p className="text-base">{post.content}</p>
                           </div>
-                          <div className="flex items-center">
-                            <span className="font-medium text-gray-700">{post.comments}</span>
-                            <span className="ml-1 text-gray-500">Comments</span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="font-medium text-gray-700">{post.shares}</span>
-                            <span className="ml-1 text-gray-500">Shares</span>
+                          <div className="flex space-x-4 text-sm">
+                            <div className="flex items-center">
+                              <span className="font-medium text-gray-700">{post.likes}</span>
+                              <span className="ml-1 text-gray-500">Likes</span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="font-medium text-gray-700">{post.comments}</span>
+                              <span className="ml-1 text-gray-500">Comments</span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="font-medium text-gray-700">{post.shares}</span>
+                              <span className="ml-1 text-gray-500">Shares</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </TabsContent>
-            
-            {/* Insights Tab Content */}
-            <TabsContent value="insights" className="space-y-6">
-              <h2 className="text-2xl font-bold mb-6">Account Insights</h2>
+              </TabsContent>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <EngagementTable 
-                  title="Content Performance" 
-                  description="Compare median and total engagement performance across content types"
-                />
+              {/* Insights Tab Content */}
+              <TabsContent value="insights" className="space-y-6">
+                <h2 className="text-2xl font-bold mb-6">Account Insights</h2>
                 
-                <div className="space-y-6">
-                  <PostPerformance 
-                    title="Audience Demographics" 
-                    description="Analyze your audience by age and gender"
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <EngagementTable 
+                    title="Content Performance" 
+                    description="Compare median and total engagement performance across content types"
                   />
                   
-                  <Card className="p-4">
-                    <h3 className="text-lg font-semibold mb-4">Recommended Actions</h3>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <div className="bg-blue-100 p-1 rounded mr-2">
-                          <Lightbulb className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <span className="text-sm">Post more video content to increase engagement rate</span>
-                      </li>
-                      <li className="flex items-start">
-                        <div className="bg-blue-100 p-1 rounded mr-2">
-                          <Lightbulb className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <span className="text-sm">Engage with comments more frequently to boost interaction</span>
-                      </li>
-                      <li className="flex items-start">
-                        <div className="bg-blue-100 p-1 rounded mr-2">
-                          <Lightbulb className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <span className="text-sm">Target content towards 25-34 age group for better reach</span>
-                      </li>
-                    </ul>
-                  </Card>
+                  <div className="space-y-6">
+                    <PostPerformance 
+                      title="Audience Demographics" 
+                      description="Analyze your audience by age and gender"
+                    />
+                    
+                    <Card className="p-4">
+                      <h3 className="text-lg font-semibold mb-4">Recommended Actions</h3>
+                      <ul className="space-y-2">
+                        <li className="flex items-start">
+                          <div className="bg-blue-100 p-1 rounded mr-2">
+                            <Lightbulb className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="text-sm">Post more video content to increase engagement rate</span>
+                        </li>
+                        <li className="flex items-start">
+                          <div className="bg-blue-100 p-1 rounded mr-2">
+                            <Lightbulb className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="text-sm">Engage with comments more frequently to boost interaction</span>
+                        </li>
+                        <li className="flex items-start">
+                          <div className="bg-blue-100 p-1 rounded mr-2">
+                            <Lightbulb className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="text-sm">Target content towards 25-34 age group for better reach</span>
+                        </li>
+                      </ul>
+                    </Card>
+                  </div>
                 </div>
-              </div>
             </TabsContent>
           </Tabs>
         </div>
