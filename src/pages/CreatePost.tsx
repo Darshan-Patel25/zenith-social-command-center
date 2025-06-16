@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,7 +27,8 @@ import {
   Clock,
   Edit,
   Eye,
-  Search
+  Search,
+  Send
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -177,15 +177,21 @@ const CreatePost: React.FC = () => {
                 </svg>
               </span>
             </Button>
-            <Button className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600">
-              <Calendar className="h-4 w-4" />
-              Schedule Post
-              <span className="ml-1">
-                <svg width="10" height="10" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4 6L7.5 9.5L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-            </Button>
+            <div className="flex gap-2">
+              <Button className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+                <Send className="h-4 w-4" />
+                Post Now
+              </Button>
+              <Button className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600">
+                <Calendar className="h-4 w-4" />
+                Schedule Post
+                <span className="ml-1">
+                  <svg width="10" height="10" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 6L7.5 9.5L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
         
