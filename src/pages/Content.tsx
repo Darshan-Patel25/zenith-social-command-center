@@ -1,11 +1,12 @@
+
 import React, { useState } from 'react';
- import PageHeader from '@/components/layout/PageHeader';
+import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PlatformSelector from '@/components/PlatformSelector';
 import PostCard from '@/components/PostCard';
-import { mockData } from '@/data/mockData';
+import { usePosts, useDeletePost } from '@/hooks/useSupabaseData';
 import { Search, ListFilter, Grid, List, Filter } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { 
@@ -30,10 +31,13 @@ export default function Content() {
   const [sortBy, setSortBy] = useState('date');
   const { toast } = useToast();
 
-  const filteredPosts = mockData.posts.filter(post => {
+  const { data: posts = [], isLoading } = usePosts();
+  const deletePostMutation = useDeletePost();
+
+  const filteredPosts = posts.filter(post => {
     const matchesPlatform = selectedPlatform === 'all' 
       ? true 
-      : post.platforms.includes(selectedPlatform);
+      : post.platform === selectedPlatform;
     
     const matchesStatus = statusFilter === 'all' 
       ? true 
@@ -48,14 +52,9 @@ export default function Content() {
 
   const sortedPosts = [...filteredPosts].sort((a, b) => {
     if (sortBy === 'date') {
-      const dateA = a.scheduledDate ? new Date(a.scheduledDate) : new Date(0);
-      const dateB = b.scheduledDate ? new Date(b.scheduledDate) : new Date(0);
+      const dateA = a.scheduled_date ? new Date(a.scheduled_date) : new Date(a.created_at);
+      const dateB = b.scheduled_date ? new Date(b.scheduled_date) : new Date(b.created_at);
       return dateB.getTime() - dateA.getTime();
-    }
-    if (sortBy === 'engagement' && a.engagement && b.engagement) {
-      const engA = a.engagement.likes + a.engagement.comments + a.engagement.shares;
-      const engB = b.engagement.likes + b.engagement.comments + b.engagement.shares;
-      return engB - engA;
     }
     return 0;
   });
@@ -64,11 +63,20 @@ export default function Content() {
     setSelectedPost(post);
   };
 
-  const handleDeletePost = (postId: string) => {
-    toast({
-      title: "Post deleted",
-      description: "The post has been successfully deleted.",
-    });
+  const handleDeletePost = async (postId: string) => {
+    try {
+      await deletePostMutation.mutateAsync(postId);
+      toast({
+        title: "Post deleted",
+        description: "The post has been successfully deleted.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete the post. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDuplicatePost = (post: any) => {
@@ -78,18 +86,26 @@ export default function Content() {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <><div className='pl-5 pr-3'>
+    <div className='px-3 sm:px-5'>
       <PageHeader 
         title="Content" 
         description="Manage all your social media content in one place"
         showNewPostButton
       />
 
-      <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start ">
-        <div className="w-full flex-1">
+      <div className="mb-4 sm:mb-6 flex flex-col gap-4 items-start">
+        <div className="w-full">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Search content..."
               className="pl-10"
@@ -99,10 +115,10 @@ export default function Content() {
           </div>
         </div>
         
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex gap-2 w-full overflow-x-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 whitespace-nowrap">
                 <ListFilter className="h-4 w-4" />
                 Sort
               </Button>
@@ -113,15 +129,12 @@ export default function Content() {
               <DropdownMenuItem onClick={() => setSortBy('date')}>
                 Date {sortBy === 'date' && '✓'}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('engagement')}>
-                Engagement {sortBy === 'engagement' && '✓'}
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           
           <Button 
             variant="outline" 
-            className="gap-2"
+            className="gap-2 whitespace-nowrap"
             onClick={() => setShowFilterDialog(true)}
           >
             <Filter className="h-4 w-4" />
@@ -155,7 +168,7 @@ export default function Content() {
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <PlatformSelector
           selectedPlatform={selectedPlatform}
           onSelect={setSelectedPlatform}
@@ -169,13 +182,16 @@ export default function Content() {
           </div>
           <h3 className="text-lg font-medium text-gray-900">No posts found</h3>
           <p className="text-sm text-gray-500 max-w-md mt-1">
-            We couldn't find any posts that match your current filters. Try adjusting your search or filters.
+            {posts.length === 0 
+              ? "You haven't created any posts yet. Create your first post to get started!"
+              : "We couldn't find any posts that match your current filters. Try adjusting your search or filters."
+            }
           </p>
         </div>
       ) : (
         <div className={cn(
           viewMode === 'grid' 
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" 
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" 
             : "space-y-4"
         )}>
           {sortedPosts.map((post) => (
@@ -192,7 +208,7 @@ export default function Content() {
       )}
 
       <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Filter Content</DialogTitle>
           </DialogHeader>
@@ -236,12 +252,10 @@ export default function Content() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </div>
-    </>
+    </div>
   );
 }
 
-// This component is used in the empty state
 const FileSearch = ({ className, ...props }: any) => {
   return (
     <svg

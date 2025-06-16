@@ -9,17 +9,17 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-start">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
-          <p className="text-gray-600 mt-1">Here's what's happening with your social media accounts.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Welcome back!</h1>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">Here's what's happening with your social media accounts.</p>
         </div>
       </div>
 
       <QuickStats />
       
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         <div className="xl:col-span-2">
           <PlatformStats />
         </div>

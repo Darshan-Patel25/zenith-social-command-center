@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -78,60 +79,67 @@ export default function Engage() {
   };
 
   return (
-    <><div className='pl-5 pr-3'>
-      <div className="flex justify-between items-center mb-6">
+    <div className='px-3 sm:px-5'>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-2">
         <div>
-          <h1 className="text-2xl font-bold">Engagement</h1>
-          <p className="text-muted-foreground">Respond to comments and messages across your social platforms</p>
+          <h1 className="text-xl sm:text-2xl font-bold">Engagement</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Respond to comments and messages across your social platforms</p>
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <PlatformSelector
           selectedPlatform={selectedPlatform}
           onSelect={setSelectedPlatform}
         />
       </div>
 
-      <Tabs defaultValue="comments" className="mb-6">
-        <TabsList>
-          <TabsTrigger value="comments" className="gap-2">
-            <MessageSquareText className="h-4 w-4" /> Comments
+      <Tabs defaultValue="comments" className="mb-4 sm:mb-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="comments" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+            <MessageSquareText className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Comments</span>
+            <span className="sm:hidden">Chat</span>
           </TabsTrigger>
-          <TabsTrigger value="messages" className="gap-2">
-            <MessageCircle className="h-4 w-4" /> Messages
+          <TabsTrigger value="messages" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+            <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Messages</span>
+            <span className="sm:hidden">Msg</span>
           </TabsTrigger>
-          <TabsTrigger value="mentions" className="gap-2">
-            <CheckCheck className="h-4 w-4" /> Mentions
+          <TabsTrigger value="mentions" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+            <CheckCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Mentions</span>
+            <span className="sm:hidden">@</span>
           </TabsTrigger>
         </TabsList>
       </Tabs>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-1">
           <Card className="h-full">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">Comments</CardTitle>
+                <CardTitle className="text-base sm:text-lg">Comments</CardTitle>
                 <div>
-                  <Badge className="bg-primary text-white">{filteredComments.length}</Badge>
+                  <Badge className="bg-primary text-white text-xs">{filteredComments.length}</Badge>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="p-3 border-b">
+              <div className="p-3 border-b space-y-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
                     placeholder="Search comments..."
-                    className="pl-10"
+                    className="pl-10 text-sm"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <div className="flex justify-between mt-3">
+                
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
                   <Select defaultValue={commentFilter} onValueChange={setCommentFilter}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full sm:w-[180px]">
                       <SelectValue placeholder="Filter" />
                     </SelectTrigger>
                     <SelectContent>
@@ -141,16 +149,16 @@ export default function Engage() {
                       <SelectItem value="replied">Replied</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm">
                     Mark All Read
                   </Button>
                 </div>
               </div>
               
-              <div className="max-h-[600px] overflow-y-auto">
+              <div className="max-h-[400px] sm:max-h-[600px] overflow-y-auto">
                 {filteredComments.length === 0 ? (
                   <div className="p-6 text-center text-gray-500">
-                    No comments found
+                    <p className="text-sm">No comments found</p>
                   </div>
                 ) : (
                   filteredComments.map(comment => (
@@ -162,20 +170,20 @@ export default function Engage() {
                       )}
                       onClick={() => setSelectedComment(comment.id)}
                     >
-                      <div className="flex gap-3">
-                        <Avatar>
+                      <div className="flex gap-2 sm:gap-3">
+                        <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                           <AvatarImage src={comment.avatar} />
-                          <AvatarFallback>{getInitials(comment.author)}</AvatarFallback>
+                          <AvatarFallback className="text-xs">{getInitials(comment.author)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start">
-                            <div className="font-medium truncate">{comment.author}</div>
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
+                            <div className="font-medium truncate text-sm">{comment.author}</div>
                             <div className="flex items-center gap-1 text-xs text-gray-500">
                               {getPlatformIcon(comment.platform)}
                               <span>{new Date(comment.date).toLocaleDateString()}</span>
                             </div>
                           </div>
-                          <p className="text-sm line-clamp-2 text-gray-700">{comment.content}</p>
+                          <p className="text-xs sm:text-sm line-clamp-2 text-gray-700">{comment.content}</p>
                           <p className="text-xs text-gray-500 mt-1 truncate">{comment.postPreview}</p>
                         </div>
                       </div>
@@ -191,14 +199,16 @@ export default function Engage() {
           {selectedComment ? (
             <Card className="h-full flex flex-col">
               <CardHeader className="pb-3">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg">Reply to Comment</CardTitle>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                  <CardTitle className="text-base sm:text-lg">Reply to Comment</CardTitle>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="gap-1">
-                      <Heart className="h-4 w-4" /> Like
+                    <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm">
+                      <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">Like</span>
                     </Button>
-                    <Button variant="outline" size="sm" className="gap-1">
-                      <Repeat className="h-4 w-4" /> Share
+                    <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm">
+                      <Repeat className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">Share</span>
                     </Button>
                   </div>
                 </div>
@@ -211,27 +221,27 @@ export default function Engage() {
                   return (
                     <>
                       <div className="mb-4 border-b pb-4">
-                        <div className="flex gap-3">
-                          <Avatar>
+                        <div className="flex gap-2 sm:gap-3">
+                          <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                             <AvatarImage src={comment.avatar} />
-                            <AvatarFallback>{getInitials(comment.author)}</AvatarFallback>
+                            <AvatarFallback className="text-xs">{getInitials(comment.author)}</AvatarFallback>
                           </Avatar>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium">{comment.author}</span>
+                              <span className="font-medium text-sm sm:text-base">{comment.author}</span>
                               {getPlatformIcon(comment.platform)}
                             </div>
-                            <p className="text-sm text-gray-500">{new Date(comment.date).toLocaleString()}</p>
+                            <p className="text-xs sm:text-sm text-gray-500">{new Date(comment.date).toLocaleString()}</p>
                           </div>
                         </div>
                         
-                        <div className="mt-3 bg-gray-50 rounded-lg p-3">
-                          <p className="text-sm text-gray-500 mb-1">Commenting on:</p>
-                          <p className="text-sm">{comment.postPreview}</p>
+                        <div className="mt-3 bg-gray-50 rounded-lg p-2 sm:p-3">
+                          <p className="text-xs sm:text-sm text-gray-500 mb-1">Commenting on:</p>
+                          <p className="text-xs sm:text-sm">{comment.postPreview}</p>
                         </div>
                         
                         <div className="mt-4">
-                          <p className="text-base">{comment.content}</p>
+                          <p className="text-sm sm:text-base">{comment.content}</p>
                         </div>
                       </div>
                       
@@ -239,15 +249,18 @@ export default function Engage() {
                         <label className="text-sm font-medium mb-2 block">Your Reply</label>
                         <Textarea 
                           placeholder="Write your reply..." 
-                          className="min-h-32"
+                          className="min-h-24 sm:min-h-32 text-sm"
                           value={replyText}
                           onChange={(e) => setReplyText(e.target.value)}
                         />
-                        <div className="flex justify-between mt-4">
-                          <Button variant="outline" onClick={() => setSelectedComment(null)}>
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mt-4">
+                          <Button variant="outline" onClick={() => setSelectedComment(null)} className="text-sm">
                             Cancel
                           </Button>
-                          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => handleReply(comment.id)}>
+                          <Button 
+                            className="bg-blue-600 hover:bg-blue-700 text-sm" 
+                            onClick={() => handleReply(comment.id)}
+                          >
                             Send Reply
                           </Button>
                         </div>
@@ -260,11 +273,11 @@ export default function Engage() {
           ) : (
             <Card className="h-full flex items-center justify-center">
               <div className="text-center p-6">
-                <div className="bg-gray-100 p-4 rounded-full inline-block mb-4">
-                  <MessageSquareText className="h-10 w-10 text-gray-400" />
+                <div className="bg-gray-100 p-3 sm:p-4 rounded-full inline-block mb-4">
+                  <MessageSquareText className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-medium">Select a comment</h3>
-                <p className="text-gray-500 mt-1 max-w-md">
+                <h3 className="text-base sm:text-lg font-medium">Select a comment</h3>
+                <p className="text-gray-500 mt-1 max-w-md text-sm">
                   Choose a comment from the list to view details and respond.
                 </p>
               </div>
@@ -272,7 +285,6 @@ export default function Engage() {
           )}
         </div>
       </div>
-      </div>
-    </>
+    </div>
   );
 }
