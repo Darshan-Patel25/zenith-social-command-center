@@ -126,48 +126,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Platform Filter */}
-      <div className="flex flex-wrap gap-2">
-        {platforms.map((platform) => (
-          <Button
-            key={platform.id}
-            variant={selectedPlatform === platform.id ? 'default' : 'outline'}
-            className={`gap-2 ${
-              selectedPlatform === platform.id
-                ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600'
-                : 'border-gray-200 hover:bg-gray-50 text-gray-700'
-            }`}
-            onClick={() => setSelectedPlatform(platform.id)}
-          >
-            {platform.icon && <SocialIcon platform={platform.icon} size={16} />}
-            <span>{platform.label}</span>
-          </Button>
-        ))}
-      </div>
-
-      {/* Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {[
-          { label: 'Followers', value: '24,500', Icon: Users, color: 'bg-blue-100', text: 'text-blue-600' },
-          { label: 'Posts', value: '342', Icon: FileText, color: 'bg-purple-100', text: 'text-purple-600' },
-          { label: 'Engagement', value: '3.7%', Icon: Share, color: 'bg-green-100', text: 'text-green-600' },
-          { label: 'Reach', value: '86.0K', Icon: Clock, color: 'bg-orange-100', text: 'text-orange-600' },
-        ].map(({ label, value, Icon, color, text }) => (
-          <Card key={label} className="bg-white border border-gray-200">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 ${color} rounded-full flex items-center justify-center`}>
-                  <Icon className={`w-6 h-6 ${text}`} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">{label}</p>
-                  <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      
 
       {/* Connected Accounts */}
       <Card className="lg:col-span-3">
