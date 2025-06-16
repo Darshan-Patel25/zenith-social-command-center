@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Select,
@@ -63,7 +64,7 @@ const performanceData = [
   { date: '06/09', engagement: 93, reach: 115, followers: 260 },
 ];
 
-const platformData = [
+const staticPlatformData = [
   { platform: 'Instagram', engagement: 45, posts: 200 },
   { platform: 'Facebook', engagement: 35, posts: 120 },
   { platform: 'Twitter', engagement: 25, posts: 50 },
@@ -139,7 +140,7 @@ const Analytics: React.FC = () => {
   const [dateRange, setDateRange] = useState('30');
   
   // Get platform data based on selection
-  const platformData = generatePlatformData(selectedPlatform);
+  const dynamicPlatformData = generatePlatformData(selectedPlatform);
   
   // Get platform display name
   const getPlatformDisplayName = (platform: SocialPlatform) => {
@@ -244,26 +245,26 @@ const Analytics: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                 <MetricCard 
                   title="Total Connections" 
-                  value={platformData.metrics.connections.toString()} 
+                  value={dynamicPlatformData.metrics.connections.toString()} 
                 />
                 <MetricCard 
                   title="Total Posts" 
-                  value={platformData.metrics.posts.toString()} 
+                  value={dynamicPlatformData.metrics.posts.toString()} 
                   trend={{ value: "+5", period: "last 30 days" }}
                 />
                 <MetricCard 
                   title="Total Comments" 
-                  value={platformData.metrics.comments.toString()} 
+                  value={dynamicPlatformData.metrics.comments.toString()} 
                   trend={{ value: "+8%", period: "last 30 days" }}
                 />
                 <MetricCard 
                   title="Total Reactions" 
-                  value={platformData.metrics.reactions.toString()} 
+                  value={dynamicPlatformData.metrics.reactions.toString()} 
                   trend={{ value: "+12%", period: "last 30 days" }}
                 />
                 <MetricCard 
                   title="Total Engagement" 
-                  value={platformData.metrics.engagement.toString()} 
+                  value={dynamicPlatformData.metrics.engagement.toString()} 
                 />
               </div>
               
@@ -314,7 +315,7 @@ const Analytics: React.FC = () => {
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={platformData}
+                    data={staticPlatformData}
                     layout="vertical"
                     margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
                   >
@@ -372,7 +373,7 @@ const Analytics: React.FC = () => {
                 <AnalyticsChart 
                   title="Post Performance by Type" 
                   description="Compare engagement across different post types"
-                  data={platformData.postPerformanceByType}
+                  data={dynamicPlatformData.postPerformanceByType}
                   type="bar"
                   xAxisDataKey="type"
                   lines={[
@@ -384,7 +385,7 @@ const Analytics: React.FC = () => {
                 <div className="space-y-4">
                   <h3 className="text-xl font-bold">Post History</h3>
                   <div className="bg-white rounded-lg shadow divide-y">
-                    {platformData.postHistory.map((post) => (
+                    {dynamicPlatformData.postHistory.map((post) => (
                       <div key={post.id} className="p-4">
                         <div className="flex justify-between items-start">
                           <div className="space-y-1">
