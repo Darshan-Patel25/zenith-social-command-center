@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import SideNav from './SideNav';
-// import Header from './Header';
+import UserMenu from './UserMenu';
 import { useLocation } from 'react-router-dom';
 
 interface LayoutProps {
@@ -43,9 +43,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <SideNav />
       
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'lg:ml-52' : 'ml-16'}`}>
-        {/* <Header title={getTitle()} /> */}
+        <div className="border-b bg-white flex items-center justify-between pl-2 pr-4 h-12">
+          <h1 className="text-xl font-bold pl-4">{getTitle()}</h1>
+          <UserMenu />
+        </div>
         
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto">
           {children}
         </main>
       </div>

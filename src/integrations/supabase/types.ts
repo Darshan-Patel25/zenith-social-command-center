@@ -9,7 +9,126 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      analytics_metrics: {
+        Row: {
+          created_at: string
+          date: string
+          engagement_count: number | null
+          followers_count: number | null
+          id: string
+          impressions_count: number | null
+          platform: string
+          reach_count: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          engagement_count?: number | null
+          followers_count?: number | null
+          id?: string
+          impressions_count?: number | null
+          platform: string
+          reach_count?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          engagement_count?: number | null
+          followers_count?: number | null
+          id?: string
+          impressions_count?: number | null
+          platform?: string
+          reach_count?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          comments_count: number | null
+          content: string
+          created_at: string
+          id: string
+          likes_count: number | null
+          platform: string
+          published_date: string | null
+          reach_count: number | null
+          scheduled_date: string | null
+          shares_count: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comments_count?: number | null
+          content: string
+          created_at?: string
+          id?: string
+          likes_count?: number | null
+          platform: string
+          published_date?: string | null
+          reach_count?: number | null
+          scheduled_date?: string | null
+          shares_count?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string
+          created_at?: string
+          id?: string
+          likes_count?: number | null
+          platform?: string
+          published_date?: string | null
+          reach_count?: number | null
+          scheduled_date?: string | null
+          shares_count?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_accounts: {
+        Row: {
+          account_name: string
+          account_username: string
+          created_at: string
+          followers_count: number | null
+          id: string
+          is_connected: boolean | null
+          platform: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_name: string
+          account_username: string
+          created_at?: string
+          followers_count?: number | null
+          id?: string
+          is_connected?: boolean | null
+          platform: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_name?: string
+          account_username?: string
+          created_at?: string
+          followers_count?: number | null
+          id?: string
+          is_connected?: boolean | null
+          platform?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
