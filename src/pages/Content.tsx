@@ -197,10 +197,24 @@ export default function Content() {
           {sortedPosts.map((post) => (
             <PostCard
               key={post.id}
-              post={post}
+              post={{
+                id: post.id,
+                content: post.content,
+                attachments: [],
+                scheduledDate: post.scheduled_date ? new Date(post.scheduled_date) : undefined,
+                status: post.status as 'draft' | 'scheduled' | 'published' | 'failed',
+                socialProfiles: [post.platform],
+                createdAt: new Date(post.created_at),
+                engagement: {
+                  likes: post.likes_count || 0,
+                  shares: post.shares_count || 0,
+                  comments: post.comments_count || 0,
+                  reach: post.reach_count || 0
+                }
+              }}
               variant={viewMode === 'grid' ? 'default' : 'compact'}
               onEdit={handleEditPost}
-              onDelete={handleDeletePost}
+              onDelete={() => handleDeletePost(post.id)}
               onDuplicate={handleDuplicatePost}
             />
           ))}
