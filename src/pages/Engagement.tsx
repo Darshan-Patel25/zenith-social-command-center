@@ -9,11 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import PlatformSelector from '@/components/PlatformSelector';
-import { mockData } from '@/data/mockData';
 import { Instagram, Twitter, Facebook, Send, Search, MessageSquareText, Heart, Repeat, CheckCheck, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { usePosts } from '@/hooks/useSupabaseData';
 
 export default function Engage() {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
@@ -22,8 +22,32 @@ export default function Engage() {
   const [selectedComment, setSelectedComment] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const { toast } = useToast();
+  const { data: posts = [], isLoading } = usePosts();
 
-  const filteredComments = mockData.comments.filter(comment => {
+  // Generate engagement data from posts
+  const engagementData = posts.filter(post => post.status === 'published').flatMap(post => {
+    // Mock engagement interactions for published posts
+    const interactions = [];
+    const platforms = ['facebook', 'twitter', 'instagram', 'telegram'];
+    
+    for (let i = 0; i < Math.floor(Math.random() * 5) + 1; i++) {
+      interactions.push({
+        id: `${post.id}-${i}`,
+        postId: post.id,
+        platform: post.platform,
+        author: `User ${i + 1}`,
+        avatar: '',
+        content: `Great post! This really resonates with me. ${post.content.substring(0, 20)}...`,
+        postPreview: post.content.substring(0, 50) + '...',
+        date: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        type: 'comment',
+        isRead: Math.random() > 0.3
+      });
+    }
+    return interactions;
+  });
+
+  const filteredComments = engagementData.filter(comment => {
     const matchesPlatform = selectedPlatform === 'all' 
       ? true 
       : comment.platform === selectedPlatform;

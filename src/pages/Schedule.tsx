@@ -10,43 +10,17 @@ import StatusBadge from '@/components/common/StatusBadge';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-// Mock data for scheduled posts
-const generateScheduledPosts = () => {
-  const platforms: SocialPlatform[] = ['facebook', 'twitter', 'linkedin', 'instagram', 'tiktok'];
-  const posts = [];
-  const now = new Date();
-  
-  for (let i = 0; i < 30; i++) {
-    const date = new Date(now);
-    date.setDate(now.getDate() + Math.floor(Math.random() * 31) - 5); // -5 to +25 days from today
-    date.setHours(Math.floor(Math.random() * 24));
-    date.setMinutes(Math.floor(Math.random() * 60));
-    
-    const randomPlatforms = platforms
-      .filter(() => Math.random() > 0.5)
-      .slice(0, Math.floor(Math.random() * 3) + 1);
-    
-    if (randomPlatforms.length === 0) {
-      randomPlatforms.push(platforms[Math.floor(Math.random() * platforms.length)]);
-    }
-    
-    posts.push({
-      id: `post-${i}`,
-      content: `Scheduled post #${i + 1} with some example content that might be a bit longer in some cases.`,
-      scheduledDate: date,
-      status: Math.random() > 0.2 ? 'scheduled' : 'draft',
-      platforms: randomPlatforms
-    });
-  }
-  
-  return posts;
-};
-
-const scheduledPosts = generateScheduledPosts();
+import { usePosts, useDeletePost, useUpdatePost } from '@/hooks/useSupabaseData';
+import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 const Schedule: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const { data: posts = [], isLoading } = usePosts();
+  const deletePostMutation = useDeletePost();
+  const updatePostMutation = useUpdatePost();
+  const { toast } = useToast();
   const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
 
   const prevMonth = () => {
@@ -57,10 +31,34 @@ const Schedule: React.FC = () => {
     setCurrentDate(addMonths(currentDate, 1));
   };
 
+  const filteredPosts = posts.filter(post => {
+    const matchesPlatform = selectedPlatform === 'all' 
+      ? true 
+      : post.platform === selectedPlatform;
+    
+    return matchesPlatform && (post.status === 'scheduled' || post.status === 'draft');
+  });
+
   const getPostsForDate = (date: Date) => {
-    return scheduledPosts.filter((post) => 
-      isSameDay(post.scheduledDate, date)
+    return filteredPosts.filter((post) => 
+      post.scheduled_date && isSameDay(new Date(post.scheduled_date), date)
     );
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    try {
+      await deletePostMutation.mutateAsync(postId);
+      toast({
+        title: "Post deleted",
+        description: "The post has been successfully deleted.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete the post. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getCalendarDays = () => {
@@ -76,7 +74,9 @@ const Schedule: React.FC = () => {
           <h1 className="text-2xl font-bold">Scheduled Posts</h1>
           <p className="text-muted-foreground">Manage and view your upcoming social media posts</p>
         </div>
-        <Button>Create New Post</Button>
+        <Button asChild>
+          <Link to="/create-post">Create New Post</Link>
+        </Button>
       </div>
       
       <Card>
@@ -96,7 +96,7 @@ const Schedule: React.FC = () => {
               </TabsList>
             </Tabs>
             
-            <Select defaultValue="all">
+            <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by platform" />
               </SelectTrigger>
@@ -104,9 +104,8 @@ const Schedule: React.FC = () => {
                 <SelectItem value="all">All Platforms</SelectItem>
                 <SelectItem value="facebook">Facebook</SelectItem>
                 <SelectItem value="twitter">Twitter</SelectItem>
-                <SelectItem value="linkedin">LinkedIn</SelectItem>
                 <SelectItem value="instagram">Instagram</SelectItem>
-                <SelectItem value="tiktok">TikTok</SelectItem>
+                <SelectItem value="telegram">Telegram</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -133,42 +132,55 @@ const Schedule: React.FC = () => {
           
           {viewMode === 'grid' && (
             <div className="space-y-6">
-              {getCalendarDays().map((day, index) => {
-                const postsForDay = getPostsForDate(day);
-                if (postsForDay.length === 0) return null;
-                
-                return (
-                  <div key={index} className="border rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-2 font-medium border-b">
-                      {format(day, 'EEEE, MMMM d, yyyy')}
-                    </div>
-                    <div className="divide-y">
-                      {postsForDay.map((post) => (
-                        <div key={post.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <div className="flex flex-col flex-grow space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <StatusBadge status={post.status as any} />
-                              <span className="text-sm text-muted-foreground">
-                                {format(post.scheduledDate, 'h:mm a')}
-                              </span>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-lg">Loading...</div>
+                </div>
+              ) : (
+                getCalendarDays().map((day, index) => {
+                  const postsForDay = getPostsForDate(day);
+                  if (postsForDay.length === 0) return null;
+                  
+                  return (
+                    <div key={index} className="border rounded-lg overflow-hidden">
+                      <div className="bg-gray-50 px-4 py-2 font-medium border-b">
+                        {format(day, 'EEEE, MMMM d, yyyy')}
+                      </div>
+                      <div className="divide-y">
+                        {postsForDay.map((post) => (
+                          <div key={post.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex flex-col flex-grow space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <StatusBadge status={post.status as any} />
+                                <span className="text-sm text-muted-foreground">
+                                  {post.scheduled_date ? format(new Date(post.scheduled_date), 'h:mm a') : 'Draft'}
+                                </span>
+                              </div>
+                              <p className="line-clamp-2">{post.content}</p>
+                              <div className="flex space-x-1">
+                                <SocialIcon platform={post.platform as SocialPlatform} size={16} />
+                              </div>
                             </div>
-                            <p className="line-clamp-2">{post.content}</p>
-                            <div className="flex space-x-1">
-                              {post.platforms.map((platform) => (
-                                <SocialIcon key={platform} platform={platform} size={16} />
-                              ))}
+                            <div className="flex items-center space-x-2 self-end sm:self-center">
+                              <Button variant="outline" size="sm" asChild>
+                                <Link to={`/create-post?edit=${post.id}`}>Edit</Link>
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-red-500"
+                                onClick={() => handleDeletePost(post.id)}
+                              >
+                                Delete
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2 self-end sm:self-center">
-                            <Button variant="outline" size="sm">Edit</Button>
-                            <Button variant="outline" size="sm" className="text-red-500">Delete</Button>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           )}
           
@@ -202,17 +214,14 @@ const Schedule: React.FC = () => {
                       
                       <div className="space-y-1">
                         {postsForDay.slice(0, 3).map((post) => {
-                          // Determine the class based on first platform
-                          const platformClass = post.platforms.length > 0 
-                            ? `post-${post.platforms[0]}`
-                            : 'bg-gray-200';
+                          const platformClass = `post-${post.platform}`;
                           
                           return (
                             <div 
                               key={post.id} 
                               className={`calendar-post ${platformClass} cursor-pointer`}
                             >
-                              {format(post.scheduledDate, 'h:mm a')} - {post.content.substring(0, 15)}...
+                              {post.scheduled_date ? format(new Date(post.scheduled_date), 'h:mm a') : 'Draft'} - {post.content.substring(0, 15)}...
                             </div>
                           );
                         })}
