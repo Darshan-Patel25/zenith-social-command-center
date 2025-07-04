@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -16,7 +16,7 @@ import {
   Italic, 
   Underline, 
   Link as LinkIcon,
-  Calendar,
+  Calendar as CalendarIcon,
   Hash,
   Sparkles,
   Tag,
@@ -43,12 +43,18 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import PlatformSelector from '@/components/post/PlatformSelector';
-import { useCreatePost, usePosts } from '@/hooks/useSupabaseData';
+import { useCreatePost, usePosts, useUpdatePost } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const CreatePost: React.FC = () => {
   const [activeTab, setActiveTab] = useState('create');
@@ -56,10 +62,38 @@ const CreatePost: React.FC = () => {
   const [postContent, setPostContent] = useState('');
   const [postNow, setPostNow] = useState(true);
   const [activeRightTab, setActiveRightTab] = useState('preview');
+  const [scheduledDate, setScheduledDate] = useState<Date>();
+  const [scheduledTime, setScheduledTime] = useState('09:00');
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
 
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const createPostMutation = useCreatePost();
-  const { data: drafts = [] } = usePosts();
+  const updatePostMutation = useUpdatePost();
+  const { data: posts = [] } = usePosts();
   const { toast } = useToast();
+
+  // Check if we're in edit mode
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (editId) {
+      const postToEdit = posts.find(p => p.id === editId);
+      if (postToEdit) {
+        setIsEditMode(true);
+        setEditingPostId(editId);
+        setPostContent(postToEdit.content);
+        setSelectedPlatforms([postToEdit.platform as SocialPlatform]);
+        if (postToEdit.scheduled_date) {
+          const scheduledDateTime = new Date(postToEdit.scheduled_date);
+          setScheduledDate(scheduledDateTime);
+          setScheduledTime(format(scheduledDateTime, 'HH:mm'));
+          setPostNow(false);
+        }
+      }
+    }
+  }, [searchParams, posts]);
 
   const handleCreatePost = async (isDraft = false) => {
     if (!postContent.trim()) {
@@ -80,40 +114,102 @@ const CreatePost: React.FC = () => {
       return;
     }
 
-    try {
-      for (const platform of selectedPlatforms) {
-        await createPostMutation.mutateAsync({
-          content: postContent,
-          platform,
-          status: isDraft ? 'draft' : (postNow ? 'published' : 'scheduled'),
-          scheduled_date: postNow ? undefined : new Date().toISOString(),
+    let scheduledDateTime: string | undefined;
+    if (!postNow && !isDraft) {
+      if (!scheduledDate) {
+        toast({
+          title: "Schedule date required",
+          description: "Please select a date and time for scheduling.",
+          variant: "destructive",
         });
+        return;
       }
+      
+      const [hours, minutes] = scheduledTime.split(':');
+      const dateTime = new Date(scheduledDate);
+      dateTime.setHours(parseInt(hours), parseInt(minutes));
+      
+      if (dateTime <= new Date()) {
+        toast({
+          title: "Invalid schedule time",
+          description: "Please select a future date and time.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      scheduledDateTime = dateTime.toISOString();
+    }
 
-      toast({
-        title: isDraft ? "Draft saved" : "Post created",
-        description: isDraft 
-          ? "Your post has been saved as a draft."
-          : postNow 
-            ? "Your post has been published successfully."
-            : "Your post has been scheduled successfully.",
-      });
+    try {
+      if (isEditMode && editingPostId) {
+        // Update existing post
+        await updatePostMutation.mutateAsync({
+          id: editingPostId,
+          content: postContent,
+          status: isDraft ? 'draft' : (postNow ? 'published' : 'scheduled'),
+          scheduled_date: scheduledDateTime,
+        });
+        
+        toast({
+          title: "Post updated",
+          description: "Your post has been updated successfully.",
+        });
+        
+        navigate('/content');
+      } else {
+        // Create new posts
+        for (const platform of selectedPlatforms) {
+          await createPostMutation.mutateAsync({
+            content: postContent,
+            platform,
+            status: isDraft ? 'draft' : (postNow ? 'published' : 'scheduled'),
+            scheduled_date: scheduledDateTime,
+          });
+        }
 
-      // Reset form
-      setPostContent('');
+        toast({
+          title: isDraft ? "Draft saved" : "Post created",
+          description: isDraft 
+            ? "Your post has been saved as a draft."
+            : postNow 
+              ? "Your post has been published successfully."
+              : "Your post has been scheduled successfully.",
+        });
+
+        // Reset form
+        setPostContent('');
+        setScheduledDate(undefined);
+        setScheduledTime('09:00');
+        setPostNow(true);
+      }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create post. Please try again.",
+        description: "Failed to save post. Please try again.",
         variant: "destructive",
       });
     }
   };
 
+  const handleSchedulePost = () => {
+    setPostNow(false);
+    setShowScheduleDialog(true);
+  };
+
+  const handleConfirmSchedule = () => {
+    setShowScheduleDialog(false);
+    handleCreatePost(false);
+  };
+
+  const drafts = posts.filter(p => p.status === 'draft');
+
   return (
     <>
       <div className="border-b bg-white items-center justify-between px-2 sm:px-4 h-12">
-        <h1 className="text-xl sm:text-2xl font-bold pl-2 sm:pl-4">Create Post</h1>
+        <h1 className="text-xl sm:text-2xl font-bold pl-2 sm:pl-4">
+          {isEditMode ? 'Edit Post' : 'Create Post'}
+        </h1>
       </div>
       
       <div className="flex flex-col h-full px-3 sm:px-4">
@@ -131,7 +227,7 @@ const CreatePost: React.FC = () => {
               onClick={() => setActiveTab('drafts')}
               className={`px-2 whitespace-nowrap ${activeTab === 'drafts' ? 'border-b-2 border-primary -mb-[2px]' : ''}`}
             >
-              Drafts ({drafts.filter(p => p.status === 'draft').length})
+              Drafts ({drafts.length})
             </Button>
             <Button 
               variant={activeTab === 'feed' ? 'link' : 'ghost'} 
@@ -246,12 +342,70 @@ const CreatePost: React.FC = () => {
                       disabled={createPostMutation.isPending}
                     >
                       <Send className="h-4 w-4" />
-                      {createPostMutation.isPending ? 'Publishing...' : 'Post Now'}
+                      {createPostMutation.isPending || updatePostMutation.isPending ? 'Publishing...' : 'Post Now'}
                     </Button>
-                    <Button className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 justify-center">
-                      <Calendar className="h-4 w-4" />
-                      Schedule Post
-                    </Button>
+                    <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 justify-center"
+                          onClick={handleSchedulePost}
+                        >
+                          <CalendarIcon className="h-4 w-4" />
+                          Schedule Post
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Schedule Post</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="schedule-date">Select Date</Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !scheduledDate && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {scheduledDate ? format(scheduledDate, "PPP") : <span>Pick a date</span>}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={scheduledDate}
+                                  onSelect={setScheduledDate}
+                                  disabled={(date) => date < new Date()}
+                                  initialFocus
+                                  className={cn("p-3 pointer-events-auto")}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="schedule-time">Select Time</Label>
+                            <Input
+                              id="schedule-time"
+                              type="time"
+                              value={scheduledTime}
+                              onChange={(e) => setScheduledTime(e.target.value)}
+                            />
+                          </div>
+                          <div className="flex justify-end gap-2 pt-4">
+                            <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>
+                              Cancel
+                            </Button>
+                            <Button onClick={handleConfirmSchedule}>
+                              Schedule Post
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               </div>
@@ -366,12 +520,22 @@ const CreatePost: React.FC = () => {
           <div className="space-y-4">
             <h2 className="text-lg sm:text-xl font-semibold">Your Drafts</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {drafts.filter(post => post.status === 'draft').map((draft) => (
+              {drafts.map((draft) => (
                 <Card key={draft.id} className="p-4">
                   <div className="space-y-2">
                     <div className="flex justify-between items-start">
                       <span className="text-xs px-2 py-1 bg-gray-100 rounded">{draft.platform}</span>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          setIsEditMode(true);
+                          setEditingPostId(draft.id);
+                          setPostContent(draft.content);
+                          setSelectedPlatforms([draft.platform as SocialPlatform]);
+                          setActiveTab('create');
+                        }}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                     </div>
@@ -382,7 +546,7 @@ const CreatePost: React.FC = () => {
                   </div>
                 </Card>
               ))}
-              {drafts.filter(post => post.status === 'draft').length === 0 && (
+              {drafts.length === 0 && (
                 <div className="col-span-full text-center py-8 text-gray-500">
                   <p>No drafts found. Start creating content!</p>
                 </div>
