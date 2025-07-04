@@ -200,16 +200,14 @@ export default function Content() {
               post={{
                 id: post.id,
                 content: post.content,
-                attachments: [],
-                scheduledDate: post.scheduled_date ? new Date(post.scheduled_date) : undefined,
-                status: post.status as 'draft' | 'scheduled' | 'published' | 'failed',
-                socialProfiles: [post.platform],
-                createdAt: new Date(post.created_at),
+                platforms: [post.platform],
+                status: post.status as 'draft' | 'scheduled' | 'published',
+                scheduledDate: post.scheduled_date || undefined,
+                scheduledTime: post.scheduled_date ? new Date(post.scheduled_date).toLocaleTimeString() : undefined,
                 engagement: {
                   likes: post.likes_count || 0,
                   shares: post.shares_count || 0,
-                  comments: post.comments_count || 0,
-                  reach: post.reach_count || 0
+                  comments: post.comments_count || 0
                 }
               }}
               variant={viewMode === 'grid' ? 'default' : 'compact'}
