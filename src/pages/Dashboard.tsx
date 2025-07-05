@@ -121,41 +121,62 @@ const Dashboard: React.FC = () => {
                 </Link>
               </Button>
               
-              <Button variant="outline" className="h-auto p-4 flex flex-col items-start gap-2">
-                <div className="flex items-center gap-2">
-                  <RefreshCw className="h-5 w-5 text-orange-600" />
-                  <span className="font-medium">Sync Accounts</span>
-                </div>
-                <p className="text-sm text-muted-foreground">Refresh data from your connected platforms</p>
+              <Button asChild variant="outline" className="h-auto p-4 flex flex-col items-start gap-2">
+                <Link to="/profile">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-5 w-5 text-orange-600" />
+                    <span className="font-medium">Sync Accounts</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Refresh data from your connected platforms</p>
+                </Link>
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Recent Activity */}
+        {/* Upcoming Posts */}
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <p className="text-sm text-muted-foreground">Latest actions from your accounts</p>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Upcoming Posts</CardTitle>
+              <p className="text-sm text-muted-foreground">Your scheduled content</p>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/schedule">View All</Link>
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center gap-3">
+              {posts
+                .filter(post => post.status === 'scheduled' && post.scheduled_date)
+                .sort((a, b) => new Date(a.scheduled_date!).getTime() - new Date(b.scheduled_date!).getTime())
+                .slice(0, 4)
+                .map((post) => (
+                <div key={post.id} className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    activity.platform === 'twitter' ? 'bg-blue-100' :
-                    activity.platform === 'facebook' ? 'bg-blue-100' :
-                    activity.platform === 'instagram' ? 'bg-pink-100' :
-                    activity.platform === 'linkedin' ? 'bg-blue-100' : 'bg-gray-100'
+                    post.platform === 'twitter' ? 'bg-blue-100' :
+                    post.platform === 'facebook' ? 'bg-blue-100' :
+                    post.platform === 'instagram' ? 'bg-pink-100' :
+                    post.platform === 'linkedin' ? 'bg-blue-100' : 'bg-gray-100'
                   }`}>
-                    <SocialIcon platform={activity.platform} size={16} />
+                    <SocialIcon platform={post.platform as SocialPlatform} size={16} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    <p className="text-sm font-medium truncate">{post.content}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {post.scheduled_date ? new Date(post.scheduled_date).toLocaleDateString() : 'Draft'}
+                    </p>
                   </div>
                 </div>
               ))}
+              {posts.filter(post => post.status === 'scheduled').length === 0 && (
+                <div className="text-center py-4">
+                  <p className="text-sm text-muted-foreground">No upcoming posts scheduled</p>
+                  <Button asChild size="sm" className="mt-2">
+                    <Link to="/create-post">Schedule your first post</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
