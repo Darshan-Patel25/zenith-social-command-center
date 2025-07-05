@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Bell, Plus, Calendar, Image, BarChart3, RefreshCw } from 'lucide-react';
+import { Bell, Plus, Calendar, Image, BarChart3, RefreshCw, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocialAccounts, usePosts } from '@/hooks/useSupabaseData';
@@ -134,53 +134,69 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Upcoming Posts */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Upcoming Posts</CardTitle>
-              <p className="text-sm text-muted-foreground">Your scheduled content</p>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/schedule">View All</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {posts
-                .filter(post => post.status === 'scheduled' && post.scheduled_date)
-                .sort((a, b) => new Date(a.scheduled_date!).getTime() - new Date(b.scheduled_date!).getTime())
-                .slice(0, 4)
-                .map((post) => (
-                <div key={post.id} className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    post.platform === 'twitter' ? 'bg-blue-100' :
-                    post.platform === 'facebook' ? 'bg-blue-100' :
-                    post.platform === 'instagram' ? 'bg-pink-100' :
-                    post.platform === 'linkedin' ? 'bg-blue-100' : 'bg-gray-100'
-                  }`}>
-                    <SocialIcon platform={post.platform as SocialPlatform} size={16} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{post.content}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {post.scheduled_date ? new Date(post.scheduled_date).toLocaleDateString() : 'Draft'}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              {posts.filter(post => post.status === 'scheduled').length === 0 && (
-                <div className="text-center py-4">
-                  <p className="text-sm text-muted-foreground">No upcoming posts scheduled</p>
-                  <Button asChild size="sm" className="mt-2">
-                    <Link to="/create-post">Schedule your first post</Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
       </div>
+
+      {/* Upcoming Posts Section */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Upcoming Posts</CardTitle>
+            <p className="text-sm text-muted-foreground">Your scheduled content</p>
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/schedule">View Calendar</Link>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {posts
+              .filter(post => post.status === 'scheduled' && post.scheduled_date)
+              .sort((a, b) => new Date(a.scheduled_date!).getTime() - new Date(b.scheduled_date!).getTime())
+              .slice(0, 3)
+              .map((post) => (
+              <div key={post.id} className="flex items-start gap-3 p-4 border rounded-lg">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  post.platform === 'twitter' ? 'bg-blue-500' :
+                  post.platform === 'facebook' ? 'bg-blue-600' :
+                  post.platform === 'instagram' ? 'bg-pink-500' :
+                  post.platform === 'linkedin' ? 'bg-blue-600' : 'bg-gray-400'
+                }`}>
+                  <SocialIcon platform={post.platform as SocialPlatform} size={20} className="text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium line-clamp-2 mb-2">{post.content}</p>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      <span>{new Date(post.scheduled_date!).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      <span>{new Date(post.scheduled_date!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" className="flex-shrink-0">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="19" cy="12" r="1"/>
+                    <circle cx="5" cy="12" r="1"/>
+                  </svg>
+                </Button>
+              </div>
+            ))}
+            {posts.filter(post => post.status === 'scheduled').length === 0 && (
+              <div className="text-center py-8">
+                <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-sm text-muted-foreground mb-2">No upcoming posts scheduled</p>
+                <Button asChild size="sm">
+                  <Link to="/create-post">Schedule your first post</Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
