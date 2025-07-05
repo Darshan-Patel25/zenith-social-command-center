@@ -29,7 +29,9 @@ import {
   Edit,
   Eye,
   Search,
-  Send
+  Send,
+  Upload,
+  File
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -50,6 +52,10 @@ import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
 import PlatformSelector from '@/components/post/PlatformSelector';
+import ImageUpload from '@/components/post/ImageUpload';
+import FileUpload from '@/components/post/FileUpload';
+import EmojiPicker from '@/components/post/EmojiPicker';
+import AIContentGenerator from '@/components/post/AIContentGenerator';
 import { useCreatePost, usePosts, useUpdatePost } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -67,6 +73,8 @@ const CreatePost: React.FC = () => {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -202,6 +210,30 @@ const CreatePost: React.FC = () => {
     handleCreatePost(false);
   };
 
+  const handleImageUpload = (files: File[]) => {
+    setUploadedImages(prev => [...prev, ...files]);
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleFileUpload = (files: File[]) => {
+    setUploadedFiles(prev => [...prev, ...files]);
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setPostContent(prev => prev + emoji);
+  };
+
+  const handleAIContentGenerated = (content: string) => {
+    setPostContent(content);
+  };
+
   const drafts = posts.filter(p => p.status === 'draft');
 
   return (
@@ -295,9 +327,8 @@ const CreatePost: React.FC = () => {
                         <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 bg-blue-100 text-blue-600 flex-shrink-0">
                           <span className="text-xs sm:text-sm">C</span>
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0">
-                          <span className="text-sm sm:text-lg">😊</span>
-                        </Button>
+                        <EmojiPicker onEmojiSelect={handleEmojiSelect} />
+                        <AIContentGenerator onContentGenerated={handleAIContentGenerated} />
                         <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0">
                           <LinkIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
@@ -417,7 +448,7 @@ const CreatePost: React.FC = () => {
                       <Tabs value={activeRightTab} onValueChange={setActiveRightTab}>
                         <TabsList className="w-full">
                           <TabsTrigger value="preview" className="flex-1 text-xs sm:text-sm">Preview</TabsTrigger>
-                          <TabsTrigger value="comments" className="flex-1 text-xs sm:text-sm">Comments</TabsTrigger>
+                          <TabsTrigger value="media" className="flex-1 text-xs sm:text-sm">Media</TabsTrigger>
                           <TabsTrigger value="accounts" className="flex-1 text-xs sm:text-sm">Accounts</TabsTrigger>
                         </TabsList>
                       
@@ -443,9 +474,25 @@ const CreatePost: React.FC = () => {
                           )}
                         </TabsContent>
                         
-                        <TabsContent value="comments" className="flex-grow p-3 sm:p-4">
-                          <div className="text-center py-8 text-gray-500">
-                            <p className="text-sm">No comments configuration available</p>
+                        <TabsContent value="media" className="flex-grow p-3 sm:p-4">
+                          <div className="space-y-6">
+                            <div>
+                              <h3 className="font-medium mb-3 text-sm sm:text-base">Upload Images</h3>
+                              <ImageUpload
+                                onImageUpload={handleImageUpload}
+                                uploadedImages={uploadedImages}
+                                onRemoveImage={handleRemoveImage}
+                              />
+                            </div>
+                            
+                            <div>
+                              <h3 className="font-medium mb-3 text-sm sm:text-base">Upload Files</h3>
+                              <FileUpload
+                                onFileUpload={handleFileUpload}
+                                uploadedFiles={uploadedFiles}
+                                onRemoveFile={handleRemoveFile}
+                              />
+                            </div>
                           </div>
                         </TabsContent>
                         
