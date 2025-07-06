@@ -134,6 +134,65 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Recent Activity</CardTitle>
+              <p className="text-sm text-muted-foreground">Latest updates from your accounts</p>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {posts
+                .slice(0, 4)
+                .map((post) => {
+                  const getActivityMessage = () => {
+                    if (post.status === 'published') return 'Post published';
+                    if (post.status === 'scheduled') return 'Post scheduled';
+                    return 'Post created';
+                  };
+                  
+                  const getTimeAgo = (date: string) => {
+                    const now = new Date();
+                    const postDate = new Date(date);
+                    const diffInHours = Math.floor((now.getTime() - postDate.getTime()) / (1000 * 60 * 60));
+                    
+                    if (diffInHours < 1) return 'Just now';
+                    if (diffInHours < 24) return `${diffInHours} hours ago`;
+                    const diffInDays = Math.floor(diffInHours / 24);
+                    if (diffInDays < 7) return `${diffInDays} days ago`;
+                    return postDate.toLocaleDateString();
+                  };
+
+                  return (
+                    <div key={post.id} className="flex items-start gap-3 p-3 border rounded-lg">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        post.platform === 'twitter' ? 'bg-blue-500' :
+                        post.platform === 'facebook' ? 'bg-blue-600' :
+                        post.platform === 'instagram' ? 'bg-pink-500' :
+                        post.platform === 'linkedin' ? 'bg-blue-600' : 'bg-gray-400'
+                      }`}>
+                        <SocialIcon platform={post.platform as SocialPlatform} size={16} className="text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">
+                          {getActivityMessage()} on {post.platform.charAt(0).toUpperCase() + post.platform.slice(1)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">{getTimeAgo(post.created_at)}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              {posts.length === 0 && (
+                <div className="text-center py-6">
+                  <Bell className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No recent activity</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Upcoming Posts Section */}
