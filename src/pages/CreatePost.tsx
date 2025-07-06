@@ -75,6 +75,9 @@ const CreatePost: React.FC = () => {
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [hashtags, setHashtags] = useState<string[]>([]);
+  const [hashtagInput, setHashtagInput] = useState('');
+  const [showHashtagDialog, setShowHashtagDialog] = useState(false);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -234,6 +237,31 @@ const CreatePost: React.FC = () => {
     setPostContent(content);
   };
 
+  const handleAddHashtag = () => {
+    if (hashtagInput.trim() && !hashtags.includes(hashtagInput.trim())) {
+      setHashtags(prev => [...prev, hashtagInput.trim()]);
+      setHashtagInput('');
+    }
+  };
+
+  const handleRemoveHashtag = (index: number) => {
+    setHashtags(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleInsertHashtags = () => {
+    const hashtagText = hashtags.map(tag => `#${tag}`).join(' ');
+    setPostContent(prev => prev + (prev ? ' ' : '') + hashtagText);
+    setShowHashtagDialog(false);
+  };
+
+  const handleImageButtonClick = () => {
+    setActiveRightTab('media');
+  };
+
+  const handleVideoButtonClick = () => {
+    setActiveRightTab('media');
+  };
+
   const drafts = posts.filter(p => p.status === 'draft');
 
   return (
@@ -321,20 +349,89 @@ const CreatePost: React.FC = () => {
                     
                     <div className="flex border-t p-2 justify-between items-center">
                       <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
-                        <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0"
+                          onClick={handleImageButtonClick}
+                          title="Add Image"
+                        >
                           <Image className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 bg-blue-100 text-blue-600 flex-shrink-0">
-                          <span className="text-xs sm:text-sm">C</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0"
+                          onClick={handleVideoButtonClick}
+                          title="Add Video"
+                        >
+                          <Video className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                         <EmojiPicker onEmojiSelect={handleEmojiSelect} />
                         <AIContentGenerator onContentGenerated={handleAIContentGenerated} />
                         <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0">
                           <LinkIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0">
-                          <Hash className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
+                        <Dialog open={showHashtagDialog} onOpenChange={setShowHashtagDialog}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0"
+                              title="Add Hashtags"
+                            >
+                              <Hash className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>Add Hashtags</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="hashtag-input">Enter hashtag (without #)</Label>
+                                <div className="flex gap-2">
+                                  <Input
+                                    id="hashtag-input"
+                                    value={hashtagInput}
+                                    onChange={(e) => setHashtagInput(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleAddHashtag()}
+                                    placeholder="e.g. socialmedia"
+                                  />
+                                  <Button onClick={handleAddHashtag}>Add</Button>
+                                </div>
+                              </div>
+                              {hashtags.length > 0 && (
+                                <div className="space-y-2">
+                                  <Label>Added hashtags:</Label>
+                                  <div className="flex flex-wrap gap-2">
+                                    {hashtags.map((tag, index) => (
+                                      <div key={index} className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                                        <span>#{tag}</span>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-4 w-4 p-0"
+                                          onClick={() => handleRemoveHashtag(index)}
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex justify-end gap-2 pt-4">
+                              <Button variant="outline" onClick={() => setShowHashtagDialog(false)}>
+                                Cancel
+                              </Button>
+                              <Button onClick={handleInsertHashtags}>
+                                Insert Hashtags
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                       <div>
                         <span className="text-gray-400 text-sm">{postContent.length}</span>
@@ -452,27 +549,40 @@ const CreatePost: React.FC = () => {
                           <TabsTrigger value="accounts" className="flex-1 text-xs sm:text-sm">Accounts</TabsTrigger>
                         </TabsList>
                       
-                        <TabsContent value="preview" className="flex-grow p-3 sm:p-4">
-                          {postContent ? (
-                            <div className="border rounded-lg p-3 sm:p-4">
-                              <div className="flex items-center space-x-2 mb-3">
-                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                  <span className="text-blue-600 font-semibold text-sm">U</span>
-                                </div>
-                                <div>
-                                  <p className="font-medium text-sm sm:text-base">User Name</p>
-                                  <p className="text-xs text-gray-500">Just now</p>
-                                </div>
-                              </div>
-                              <p className="text-sm sm:text-base mb-3">{postContent}</p>
-                            </div>
-                          ) : (
-                            <div className="text-center py-8 text-gray-500 flex flex-col items-center justify-center h-full">
-                              <PenLine className="w-8 h-8 sm:w-12 sm:h-12 mb-3 opacity-20" />
-                              <p className="text-sm">Start typing to see a preview</p>
-                            </div>
-                          )}
-                        </TabsContent>
+                         <TabsContent value="preview" className="flex-grow p-3 sm:p-4">
+                           {postContent || uploadedImages.length > 0 ? (
+                             <div className="border rounded-lg p-3 sm:p-4">
+                               <div className="flex items-center space-x-2 mb-3">
+                                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                   <span className="text-blue-600 font-semibold text-sm">U</span>
+                                 </div>
+                                 <div>
+                                   <p className="font-medium text-sm sm:text-base">User Name</p>
+                                   <p className="text-xs text-gray-500">Just now</p>
+                                 </div>
+                               </div>
+                               {postContent && <p className="text-sm sm:text-base mb-3">{postContent}</p>}
+                               {uploadedImages.length > 0 && (
+                                 <div className="grid grid-cols-2 gap-2 mb-3">
+                                   {uploadedImages.slice(0, 4).map((image, index) => (
+                                     <div key={index} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                                       <img
+                                         src={URL.createObjectURL(image)}
+                                         alt={`Preview ${index + 1}`}
+                                         className="w-full h-full object-cover"
+                                       />
+                                     </div>
+                                   ))}
+                                 </div>
+                               )}
+                             </div>
+                           ) : (
+                             <div className="text-center py-8 text-gray-500 flex flex-col items-center justify-center h-full">
+                               <PenLine className="w-8 h-8 sm:w-12 sm:h-12 mb-3 opacity-20" />
+                               <p className="text-sm">Start typing or add media to see a preview</p>
+                             </div>
+                           )}
+                         </TabsContent>
                         
                         <TabsContent value="media" className="flex-grow p-3 sm:p-4">
                           <div className="space-y-6">

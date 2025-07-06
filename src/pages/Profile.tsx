@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,26 +8,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Bell, CreditCard, Store, GraduationCap, UserCog, Users, Send, Contact, Check } from 'lucide-react';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
-
-const socialAccounts = [
-  {
-    id: '1',
-    name: 'Darshan Patel',
-    platform: 'linkedin' as SocialPlatform,
-    connected: true,
-    timezone: '(GMT+05:30) Asia/Calcutta',
-    posting: 'Direct posting',
-    paused: false
-  }
-];
+import { useSocialAccounts } from '@/hooks/useSupabaseData';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Profile: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [firstName, setFirstName] = useState('Darshan');
   const [lastName, setLastName] = useState('Patel');
-  const [email, setEmail] = useState('2022002352.gcet@cxmu.edu.in');
+  const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('(201) 555-0123');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  
+  const { user } = useAuth();
+  const { data: socialAccounts = [], isLoading } = useSocialAccounts();
+
+  useEffect(() => {
+    if (user?.email) {
+      setEmail(user.email);
+    }
+  }, [user]);
   
   return (
     <div className="space-y-6 pl-5 pr-3">
@@ -219,20 +218,20 @@ const Profile: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                <div className="p-4 border rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <div className="flex space-x-2">
-                      <p>You have connected <span className="font-bold">1 profiles</span>, in all owned workspaces, out of <span className="font-bold">25 total profiles</span> allowed for your</p>
-                      <p className="font-bold">Pro plan</p>
-                    </div>
-                    <div className="w-20 h-20 relative">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-sm">1/25</span>
-                      </div>
-                      {/* This would be a circular progress indicator */}
-                    </div>
-                  </div>
-                </div>
+                 <div className="p-4 border rounded-lg">
+                   <div className="flex justify-between items-center">
+                     <div className="flex space-x-2">
+                       <p>You have connected <span className="font-bold">{socialAccounts.length} profiles</span>, in all owned workspaces, out of <span className="font-bold">25 total profiles</span> allowed for your</p>
+                       <p className="font-bold">Free plan</p>
+                     </div>
+                     <div className="w-20 h-20 relative">
+                       <div className="absolute inset-0 flex items-center justify-center">
+                         <span className="text-sm">{socialAccounts.length}/25</span>
+                       </div>
+                       {/* This would be a circular progress indicator */}
+                     </div>
+                   </div>
+                 </div>
                 
                 <div className="flex justify-end">
                   <Button className="flex items-center gap-2">
@@ -252,59 +251,77 @@ const Profile: React.FC = () => {
                         <th className="px-4 py-3 text-left">Actions</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      {socialAccounts.map((account) => (
-                        <tr key={account.id} className="border-b">
-                          <td className="px-4 py-3">
-                            <div className="flex items-center space-x-3">
-                              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                <SocialIcon platform={account.platform} size={16} />
-                              </div>
-                              <div>
-                                <p className="font-medium">{account.name}</p>
-                                <p className="text-xs text-muted-foreground">{account.platform} Profile</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Connected
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-sm">{account.timezone}</td>
-                          <td className="px-4 py-3 text-sm">{account.posting}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center space-x-2">
-                              <Button variant="outline" size="sm">
-                                Reconnect
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Contact className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <svg
-                                  width="15"
-                                  height="15"
-                                  viewBox="0 0 15 15"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M7.5 2C7.77614 2 8 2.22386 8 2.5V12.5C8 12.7761 7.77614 13 7.5 13C7.22386 13 7 12.7761 7 12.5V2.5C7 2.22386 7.22386 2 7.5 2Z"
-                                    fill="currentColor"
-                                  />
-                                  <path
-                                    d="M2.5 7C2.22386 7 2 7.22386 2 7.5C2 7.77614 2.22386 8 2.5 8H12.5C12.7761 8 13 7.77614 13 7.5C13 7.22386 12.7761 7 12.5 7H2.5Z"
-                                    fill="currentColor"
-                                  />
-                                </svg>
-                              </Button>
-                              <Switch checked={!account.paused} />
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
+                     <tbody>
+                       {isLoading ? (
+                         <tr>
+                           <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                             Loading social accounts...
+                           </td>
+                         </tr>
+                       ) : socialAccounts.length === 0 ? (
+                         <tr>
+                           <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                             No social accounts connected yet. Click "Connect social account" to get started.
+                           </td>
+                         </tr>
+                       ) : (
+                         socialAccounts.map((account) => (
+                           <tr key={account.id} className="border-b">
+                             <td className="px-4 py-3">
+                               <div className="flex items-center space-x-3">
+                                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                   <SocialIcon platform={account.platform as SocialPlatform} size={16} />
+                                 </div>
+                                 <div>
+                                   <p className="font-medium">{account.account_name}</p>
+                                   <p className="text-xs text-muted-foreground">@{account.account_username}</p>
+                                 </div>
+                               </div>
+                             </td>
+                             <td className="px-4 py-3">
+                               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                 account.is_connected 
+                                   ? 'bg-green-100 text-green-800' 
+                                   : 'bg-red-100 text-red-800'
+                               }`}>
+                                 {account.is_connected ? 'Connected' : 'Disconnected'}
+                               </span>
+                             </td>
+                             <td className="px-4 py-3 text-sm">(GMT+05:30) Asia/Calcutta</td>
+                             <td className="px-4 py-3 text-sm">Direct posting</td>
+                             <td className="px-4 py-3">
+                               <div className="flex items-center space-x-2">
+                                 <Button variant="outline" size="sm">
+                                   Reconnect
+                                 </Button>
+                                 <Button variant="ghost" size="sm">
+                                   <Contact className="h-4 w-4" />
+                                 </Button>
+                                 <Button variant="ghost" size="sm">
+                                   <svg
+                                     width="15"
+                                     height="15"
+                                     viewBox="0 0 15 15"
+                                     fill="none"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                   >
+                                     <path
+                                       d="M7.5 2C7.77614 2 8 2.22386 8 2.5V12.5C8 12.7761 7.77614 13 7.5 13C7.22386 13 7 12.7761 7 12.5V2.5C7 2.22386 7.22386 2 7.5 2Z"
+                                       fill="currentColor"
+                                     />
+                                     <path
+                                       d="M2.5 7C2.22386 7 2 7.22386 2 7.5C2 7.77614 2.22386 8 2.5 8H12.5C12.7761 8 13 7.77614 13 7.5C13 7.22386 12.7761 7 12.5 7H2.5Z"
+                                       fill="currentColor"
+                                     />
+                                   </svg>
+                                 </Button>
+                                 <Switch checked={account.is_connected} />
+                               </div>
+                             </td>
+                           </tr>
+                         ))
+                       )}
+                     </tbody>
                   </table>
                 </div>
               </div>
