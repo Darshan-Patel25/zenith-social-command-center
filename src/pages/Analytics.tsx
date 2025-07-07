@@ -22,6 +22,7 @@ import AnalyticsChart from '@/components/analytics/AnalyticsChart';
 import EngagementTable from '@/components/analytics/EngagementTable';
 import PostPerformance from '@/components/analytics/PostPerformance';
 import { useAnalyticsMetrics, usePosts, useSocialAccounts } from '@/hooks/useSupabaseData';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import {
   ChevronDown,
   Edit,
@@ -225,6 +226,10 @@ const Analytics: React.FC = () => {
       </div>
       
       <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 pt-3">
+        {/* Analytics Dashboard Overview */}
+        <AnalyticsDashboard />
+        
+        <div className="border-t pt-6" />
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
           <div className="flex items-center gap-2">
             <h1 className="text-lg sm:text-xl font-semibold">{getPlatformDisplayName(selectedPlatform)} Analytics</h1>

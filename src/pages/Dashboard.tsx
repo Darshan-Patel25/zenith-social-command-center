@@ -2,33 +2,38 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Bell, Plus, Calendar, Image, BarChart3, RefreshCw, Clock } from 'lucide-react';
+import { Bell, Plus, Calendar, Image, BarChart3, RefreshCw, Clock, TrendingUp, Users, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSocialAccounts, usePosts } from '@/hooks/useSupabaseData';
+import { useSocialAccounts, usePosts, useAnalyticsMetrics } from '@/hooks/useSupabaseData';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { data: socialAccounts = [] } = useSocialAccounts();
   const { data: posts = [] } = usePosts();
+  const { data: analyticsData = [] } = useAnalyticsMetrics();
+  const { toast } = useToast();
 
-  // Mock data for connected accounts (in a real app, this would come from your database)
-  const mockAccounts = [
-    { platform: 'twitter' as SocialPlatform, name: '@yourbrand', connected: true },
-    { platform: 'facebook' as SocialPlatform, name: 'Your Brand', connected: true },
-    { platform: 'instagram' as SocialPlatform, name: '@yourbrand', connected: true },
-    { platform: 'linkedin' as SocialPlatform, name: 'Your Brand', connected: false },
-  ];
+  // Calculate analytics summary
+  const totalFollowers = socialAccounts.reduce((sum, account) => sum + (account.followers_count || 0), 0);
+  const publishedPosts = posts.filter(post => post.status === 'published').length;
+  const scheduledPosts = posts.filter(post => post.status === 'scheduled').length;
+  const totalEngagement = posts.reduce((sum, post) => sum + (post.likes_count || 0) + (post.comments_count || 0) + (post.shares_count || 0), 0);
 
-  // Recent activity mock data (in a real app, this would come from your database)
-  const recentActivity = [
-    { id: 1, action: 'Post published on Twitter', time: '30 mins ago', platform: 'twitter' as SocialPlatform },
-    { id: 2, action: 'Post scheduled for Instagram', time: '2 hours ago', platform: 'instagram' as SocialPlatform },
-    { id: 3, action: 'LinkedIn account connected', time: '5 hours ago', platform: 'linkedin' as SocialPlatform },
-    { id: 4, action: 'New comments on Facebook post', time: 'Jun 10', platform: 'facebook' as SocialPlatform },
-  ];
+  // Get available platforms (not yet connected)
+  const connectedPlatforms = socialAccounts.map(acc => acc.platform);
+  const availablePlatforms = ['facebook', 'twitter', 'instagram', 'linkedin', 'telegram']
+    .filter(platform => !connectedPlatforms.includes(platform));
+
+  const handleConnectAccount = () => {
+    toast({
+      title: "Connect Account",
+      description: "Account connection feature will be available soon. For now, you can add accounts via the Profile page.",
+    });
+  };
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
@@ -36,11 +41,58 @@ const Dashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's what's happening with your accounts.</p>
+          <p className="text-muted-foreground">Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}! Here's what's happening with your accounts.</p>
         </div>
         <Button variant="outline" size="icon">
           <Bell className="h-4 w-4" />
         </Button>
+      </div>
+
+      {/* Analytics Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Followers</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalFollowers.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Across all platforms</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Published Posts</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{publishedPosts}</div>
+            <p className="text-xs text-muted-foreground">This month</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Scheduled Posts</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{scheduledPosts}</div>
+            <p className="text-xs text-muted-foreground">Ready to publish</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Engagement</CardTitle>
+            <MessageCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalEngagement}</div>
+            <p className="text-xs text-muted-foreground">Likes, comments & shares</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Connected Accounts */}
@@ -53,23 +105,48 @@ const Dashboard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {mockAccounts.map((account, index) => (
-              <div key={index} className="flex flex-col items-center p-4 border rounded-lg">
+            {socialAccounts.map((account) => (
+              <div key={account.id} className="flex flex-col items-center p-4 border rounded-lg">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
                   account.platform === 'twitter' ? 'bg-blue-500' :
                   account.platform === 'facebook' ? 'bg-blue-600' :
                   account.platform === 'instagram' ? 'bg-pink-500' :
-                  account.platform === 'linkedin' ? 'bg-gray-400' : 'bg-gray-400'
+                  account.platform === 'linkedin' ? 'bg-blue-600' :
+                  account.platform === 'telegram' ? 'bg-sky-500' : 'bg-gray-400'
                 }`}>
-                  <SocialIcon platform={account.platform} size={24} className="text-white" />
+                  <SocialIcon platform={account.platform as SocialPlatform} size={24} className="text-white" />
                 </div>
-                <p className="font-medium text-sm text-center">{account.name}</p>
-                <p className={`text-xs mt-1 ${account.connected ? 'text-green-600' : 'text-gray-500'}`}>
-                  {account.connected ? 'Connected' : 'Not connected'}
+                <p className="font-medium text-sm text-center truncate w-full">{account.account_name}</p>
+                <p className="text-xs text-gray-500 truncate w-full text-center">@{account.account_username}</p>
+                <p className={`text-xs mt-1 ${account.is_connected ? 'text-green-600' : 'text-gray-500'}`}>
+                  {account.is_connected ? 'Connected' : 'Disconnected'}
                 </p>
+                {account.followers_count && (
+                  <p className="text-xs text-muted-foreground">{account.followers_count.toLocaleString()} followers</p>
+                )}
               </div>
             ))}
-            <div className="flex flex-col items-center p-4 border-2 border-dashed border-gray-300 rounded-lg">
+            
+            {/* Show available platforms to connect */}
+            {availablePlatforms.slice(0, 3).map((platform) => (
+              <div 
+                key={platform} 
+                className="flex flex-col items-center p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+                onClick={handleConnectAccount}
+              >
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                  <SocialIcon platform={platform as SocialPlatform} size={24} className="text-gray-400" />
+                </div>
+                <p className="font-medium text-sm text-center">Connect {platform}</p>
+                <p className="text-xs text-muted-foreground mt-1">Not connected</p>
+              </div>
+            ))}
+            
+            {/* Add more accounts option */}
+            <div 
+              className="flex flex-col items-center p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+              onClick={handleConnectAccount}
+            >
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
                 <Plus className="h-6 w-6 text-gray-400" />
               </div>

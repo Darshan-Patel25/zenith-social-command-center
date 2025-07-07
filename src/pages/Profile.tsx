@@ -8,8 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Bell, CreditCard, Store, GraduationCap, UserCog, Users, Send, Contact, Check } from 'lucide-react';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
-import { useSocialAccounts } from '@/hooks/useSupabaseData';
+import { useSocialAccounts, useConnectSocialAccount } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/contexts/AuthContext';
+import ConnectSocialAccount from '@/components/ConnectSocialAccount';
+import { useToast } from '@/hooks/use-toast';
 
 const Profile: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -234,10 +236,7 @@ const Profile: React.FC = () => {
                  </div>
                 
                 <div className="flex justify-end">
-                  <Button className="flex items-center gap-2">
-                    <Send className="w-4 h-4" />
-                    Connect social account
-                  </Button>
+                  <ConnectSocialAccount />
                 </div>
                 
                 <div className="border rounded-lg overflow-hidden">
