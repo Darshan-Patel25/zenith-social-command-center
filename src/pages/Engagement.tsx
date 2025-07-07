@@ -24,24 +24,42 @@ export default function Engage() {
   const { toast } = useToast();
   const { data: posts = [], isLoading } = usePosts();
 
-  // Generate engagement data from posts
+  // Generate realistic engagement data from published posts
   const engagementData = posts.filter(post => post.status === 'published').flatMap(post => {
-    // Mock engagement interactions for published posts
     const interactions = [];
-    const platforms = ['facebook', 'twitter', 'instagram', 'telegram'];
+    const userNames = ['Alex Johnson', 'Sarah Chen', 'Mike Rodriguez', 'Emma Thompson', 'David Kim', 'Lisa Anderson'];
+    const comments = [
+      'This is incredibly helpful! Thanks for sharing.',
+      'Love this content! Keep it up!',
+      'Great insights. Can you share more about this topic?',
+      'This really helped me understand the concept better.',
+      'Amazing work! Looking forward to more posts like this.',
+      'Very informative. Thanks for the detailed explanation.',
+      'This is exactly what I was looking for!',
+      'Brilliant post! Shared with my team.',
+      'Could you elaborate more on this point?',
+      'Fantastic content as always!'
+    ];
     
-    for (let i = 0; i < Math.floor(Math.random() * 5) + 1; i++) {
+    // Generate 1-8 interactions per published post
+    const numInteractions = Math.floor(Math.random() * 8) + 1;
+    
+    for (let i = 0; i < numInteractions; i++) {
+      const author = userNames[Math.floor(Math.random() * userNames.length)];
+      const comment = comments[Math.floor(Math.random() * comments.length)];
+      
       interactions.push({
         id: `${post.id}-${i}`,
         postId: post.id,
         platform: post.platform,
-        author: `User ${i + 1}`,
-        avatar: '',
-        content: `Great post! This really resonates with me. ${post.content.substring(0, 20)}...`,
-        postPreview: post.content.substring(0, 50) + '...',
+        author,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${author}`,
+        content: comment,
+        postPreview: post.content.substring(0, 50) + (post.content.length > 50 ? '...' : ''),
         date: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
         type: 'comment',
-        isRead: Math.random() > 0.3
+        isRead: Math.random() > 0.4, // 60% chance of being read
+        hasMedia: !!(post.images?.length || post.videos?.length || post.files?.length)
       });
     }
     return interactions;

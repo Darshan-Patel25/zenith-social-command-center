@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar as CalendarIcon, Grid, List, ChevronLeft, ChevronRight, Calendar as CalendarComponent } from 'lucide-react';
+import { Calendar as CalendarIcon, Grid, List, ChevronLeft, ChevronRight, Calendar as CalendarComponent, Image as ImageIcon, Video as VideoIcon, FileIcon } from 'lucide-react';
 import { format, addMonths, subMonths, getMonth, getYear, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -157,6 +157,31 @@ const Schedule: React.FC = () => {
                                 </span>
                               </div>
                               <p className="line-clamp-2">{post.content}</p>
+                              
+                              {/* Display media */}
+                              {(post.images || post.videos || post.files) && (
+                                <div className="flex items-center gap-2 mt-2">
+                                  {post.images && post.images.length > 0 && (
+                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                      <ImageIcon className="h-3 w-3" />
+                                      <span>{post.images.length} image{post.images.length !== 1 ? 's' : ''}</span>
+                                    </div>
+                                  )}
+                                  {post.videos && post.videos.length > 0 && (
+                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                      <VideoIcon className="h-3 w-3" />
+                                      <span>{post.videos.length} video{post.videos.length !== 1 ? 's' : ''}</span>
+                                    </div>
+                                  )}
+                                  {post.files && post.files.length > 0 && (
+                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                      <FileIcon className="h-3 w-3" />
+                                      <span>{post.files.length} file{post.files.length !== 1 ? 's' : ''}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              
                               <div className="flex space-x-1">
                                 <SocialIcon platform={post.platform as SocialPlatform} size={16} />
                               </div>

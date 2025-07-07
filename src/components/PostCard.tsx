@@ -13,6 +13,9 @@ import {
   Edit,
   Trash,
   Copy,
+  Image,
+  Video,
+  FileIcon,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -26,6 +29,9 @@ export interface Post {
   id: string;
   content: string;
   image?: string;
+  images?: string[];
+  videos?: string[];
+  files?: string[];
   platforms: string[];
   status: 'scheduled' | 'published' | 'draft';
   scheduledDate?: string;
@@ -101,6 +107,7 @@ export default function PostCard({
           </Badge>
         </div>
 
+        {/* Legacy single image support */}
         {post.image && variant !== 'compact' && (
           <div className="relative w-full h-40 mb-3 rounded-md overflow-hidden">
             <img
@@ -111,12 +118,63 @@ export default function PostCard({
           </div>
         )}
 
+        {/* New multiple images support */}
+        {post.images && post.images.length > 0 && variant !== 'compact' && (
+          <div className="mb-3">
+            <div className={cn(
+              "grid gap-2 rounded-md overflow-hidden",
+              post.images.length === 1 ? "grid-cols-1" : 
+              post.images.length === 2 ? "grid-cols-2" :
+              "grid-cols-2"
+            )}>
+              {post.images.slice(0, 4).map((imageUrl, index) => (
+                <div key={index} className="relative aspect-square bg-gray-100">
+                  <img
+                    src={imageUrl}
+                    alt={`Post image ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  {index === 3 && post.images!.length > 4 && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                      <span className="text-white font-medium">+{post.images!.length - 4}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <p className={cn(
           "text-gray-700 dark:text-gray-300 flex-grow", 
           variant === 'compact' ? 'line-clamp-2 text-sm' : 'line-clamp-3'
         )}>
           {post.content}
         </p>
+
+        {/* Media indicators */}
+        {(post.images || post.videos || post.files) && (
+          <div className="flex items-center gap-2 mt-2">
+            {post.images && post.images.length > 0 && (
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <Image className="h-3 w-3" />
+                <span>{post.images.length}</span>
+              </div>
+            )}
+            {post.videos && post.videos.length > 0 && (
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <Video className="h-3 w-3" />
+                <span>{post.videos.length}</span>
+              </div>
+            )}
+            {post.files && post.files.length > 0 && (
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <FileIcon className="h-3 w-3" />
+                <span>{post.files.length}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {post.scheduledDate && post.scheduledTime && (
           <div className="mt-3 flex items-center text-sm text-gray-500">

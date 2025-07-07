@@ -79,6 +79,9 @@ export const useCreatePost = () => {
       platform: string;
       scheduled_date?: string;
       status?: string;
+      images?: string[];
+      videos?: string[];
+      files?: string[];
     }) => {
       if (!user) throw new Error('User not authenticated');
       
@@ -93,6 +96,31 @@ export const useCreatePost = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+  });
+};
+
+export const useUploadFile = () => {
+  const { user } = useAuth();
+  
+  return useMutation({
+    mutationFn: async (file: File) => {
+      if (!user) throw new Error('User not authenticated');
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('post-media')
+        .upload(fileName, file);
+      
+      if (error) throw error;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('post-media')
+        .getPublicUrl(fileName);
+      
+      return publicUrl;
     },
   });
 };

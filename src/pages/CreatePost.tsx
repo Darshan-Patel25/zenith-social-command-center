@@ -56,7 +56,7 @@ import ImageUpload from '@/components/post/ImageUpload';
 import FileUpload from '@/components/post/FileUpload';
 import EmojiPicker from '@/components/post/EmojiPicker';
 import AIContentGenerator from '@/components/post/AIContentGenerator';
-import { useCreatePost, usePosts, useUpdatePost } from '@/hooks/useSupabaseData';
+import { useCreatePost, usePosts, useUpdatePost, useUploadFile, useSocialAccounts } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -83,7 +83,9 @@ const CreatePost: React.FC = () => {
   const navigate = useNavigate();
   const createPostMutation = useCreatePost();
   const updatePostMutation = useUpdatePost();
+  const uploadFileMutation = useUploadFile();
   const { data: posts = [] } = usePosts();
+  const { data: socialAccounts = [] } = useSocialAccounts();
   const { toast } = useToast();
 
   // Check if we're in edit mode
@@ -153,6 +155,35 @@ const CreatePost: React.FC = () => {
     }
 
     try {
+      // Upload media files first
+      const imageUrls: string[] = [];
+      const videoUrls: string[] = [];
+      const fileUrls: string[] = [];
+
+      // Upload images
+      for (const image of uploadedImages) {
+        try {
+          const url = await uploadFileMutation.mutateAsync(image);
+          if (image.type.startsWith('image/')) {
+            imageUrls.push(url);
+          } else if (image.type.startsWith('video/')) {
+            videoUrls.push(url);
+          }
+        } catch (error) {
+          console.error('Failed to upload image:', error);
+        }
+      }
+
+      // Upload files
+      for (const file of uploadedFiles) {
+        try {
+          const url = await uploadFileMutation.mutateAsync(file);
+          fileUrls.push(url);
+        } catch (error) {
+          console.error('Failed to upload file:', error);
+        }
+      }
+
       if (isEditMode && editingPostId) {
         // Update existing post
         await updatePostMutation.mutateAsync({
@@ -160,6 +191,9 @@ const CreatePost: React.FC = () => {
           content: postContent,
           status: isDraft ? 'draft' : (postNow ? 'published' : 'scheduled'),
           scheduled_date: scheduledDateTime,
+          images: imageUrls.length > 0 ? imageUrls : undefined,
+          videos: videoUrls.length > 0 ? videoUrls : undefined,
+          files: fileUrls.length > 0 ? fileUrls : undefined,
         });
         
         toast({
@@ -176,6 +210,9 @@ const CreatePost: React.FC = () => {
             platform,
             status: isDraft ? 'draft' : (postNow ? 'published' : 'scheduled'),
             scheduled_date: scheduledDateTime,
+            images: imageUrls.length > 0 ? imageUrls : undefined,
+            videos: videoUrls.length > 0 ? videoUrls : undefined,
+            files: fileUrls.length > 0 ? fileUrls : undefined,
           });
         }
 
@@ -190,6 +227,8 @@ const CreatePost: React.FC = () => {
 
         // Reset form
         setPostContent('');
+        setUploadedImages([]);
+        setUploadedFiles([]);
         setScheduledDate(undefined);
         setScheduledTime('09:00');
         setPostNow(true);
@@ -609,7 +648,7 @@ const CreatePost: React.FC = () => {
                         <TabsContent value="accounts" className="flex-grow overflow-auto">
                           <div className="p-3 sm:p-4">
                             <div className="mb-4">
-                              <h3 className="font-medium mb-2 text-sm sm:text-base">Group</h3>
+                              <h3 className="font-medium mb-2 text-sm sm:text-base">Connected Accounts</h3>
                               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
                                 <div className="relative w-full sm:max-w-[240px]">
                                   <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -623,44 +662,61 @@ const CreatePost: React.FC = () => {
                                 </Button>
                               </div>
                               
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <Checkbox id="select-all" />
-                                    <Label htmlFor="select-all" className="text-sm">1 Account selected.</Label>
+                              {socialAccounts.length > 0 ? (
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <Checkbox id="select-all" />
+                                      <Label htmlFor="select-all" className="text-sm">
+                                        {socialAccounts.length} Account{socialAccounts.length !== 1 ? 's' : ''} available
+                                      </Label>
+                                    </div>
+                                    <Button variant="link" className="text-blue-500 h-auto p-0 text-sm">
+                                      Clear All
+                                    </Button>
                                   </div>
-                                  <Button variant="link" className="text-blue-500 h-auto p-0 text-sm">
-                                    Clear All
+                                  
+                                  {socialAccounts.map((account) => (
+                                    <div key={account.id} className="flex items-center border p-2 rounded-md justify-between bg-gray-50">
+                                      <div className="flex items-center gap-2">
+                                        <Checkbox 
+                                          id={`account-${account.id}`} 
+                                          checked={selectedPlatforms.includes(account.platform as SocialPlatform)}
+                                          onCheckedChange={(checked) => {
+                                            if (checked) {
+                                              setSelectedPlatforms(prev => [...prev, account.platform as SocialPlatform]);
+                                            } else {
+                                              setSelectedPlatforms(prev => prev.filter(p => p !== account.platform));
+                                            }
+                                          }}
+                                        />
+                                        <div className="flex items-center gap-1">
+                                          <SocialIcon platform={account.platform as SocialPlatform} size={20} />
+                                          <Label htmlFor={`account-${account.id}`} className="text-sm">
+                                            {account.account_name}
+                                          </Label>
+                                        </div>
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        {account.followers_count ? `${account.followers_count} followers` : ''}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-8 text-gray-500">
+                                  <div className="w-full max-w-[200px] sm:max-w-[240px] mx-auto mb-4">
+                                    <img src="/lovable-uploads/dfc9e41d-494b-4d37-97d8-ec2f91b236a4.png" alt="No accounts" className="w-full" />
+                                  </div>
+                                  <p className="text-sm">No social accounts connected</p>
+                                  <p className="text-xs text-gray-400 max-w-[300px] mx-auto mt-2">
+                                    Connect your social media accounts to start posting and managing content.
+                                  </p>
+                                  <Button className="mt-4 text-sm">
+                                    <Plus className="h-4 w-4 mr-1" /> Connect Account
                                   </Button>
                                 </div>
-                                
-                                <div className="flex items-center border p-2 rounded-md justify-between bg-gray-50">
-                                  <div className="flex items-center gap-2">
-                                    <Checkbox id="linkedin-account" checked />
-                                    <div className="flex items-center gap-1">
-                                      <div className="bg-blue-600 text-white rounded p-1 flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6">
-                                        <span className="text-xs">in</span>
-                                      </div>
-                                      <Label htmlFor="linkedin-account" className="text-sm">Darshan</Label>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="mt-8">
-                              <div className="flex items-center justify-center flex-col gap-2">
-                                <div className="w-full max-w-[200px] sm:max-w-[240px]">
-                                  <img src="/lovable-uploads/dfc9e41d-494b-4d37-97d8-ec2f91b236a4.png" alt="Empty state" className="w-full" />
-                                </div>
-                                <p className="text-center text-gray-500 text-sm">You have not created any groups yet</p>
-                                <p className="text-center text-xs sm:text-sm text-gray-400 max-w-[300px]">
-                                  You can sort your social media accounts in a Group. Use it for quick selection, filtering and more.
-                                </p>
-                                <Button className="mt-2 text-sm">
-                                  <Plus className="h-4 w-4 mr-1" /> Create Group
-                                </Button>
-                              </div>
+                              )}
                             </div>
                           </div>
                         </TabsContent>

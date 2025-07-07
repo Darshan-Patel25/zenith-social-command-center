@@ -204,6 +204,9 @@ export default function Content() {
                 status: post.status as 'draft' | 'scheduled' | 'published',
                 scheduledDate: post.scheduled_date || undefined,
                 scheduledTime: post.scheduled_date ? new Date(post.scheduled_date).toLocaleTimeString() : undefined,
+                images: post.images || undefined,
+                videos: post.videos || undefined,
+                files: post.files || undefined,
                 engagement: {
                   likes: post.likes_count || 0,
                   shares: post.shares_count || 0,
