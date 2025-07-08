@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useConnectSocialAccount } from '@/hooks/useSupabaseData';
+import { useOAuth } from '@/hooks/useOAuth';
 import { useToast } from '@/hooks/use-toast';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
-import { Plus } from 'lucide-react';
+import { Plus, ExternalLink } from 'lucide-react';
 
 interface ConnectSocialAccountProps {
   onSuccess?: () => void;
@@ -18,11 +15,8 @@ interface ConnectSocialAccountProps {
 const ConnectSocialAccount: React.FC<ConnectSocialAccountProps> = ({ onSuccess }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [platform, setPlatform] = useState<string>('');
-  const [accountName, setAccountName] = useState('');
-  const [username, setUsername] = useState('');
-  const [followersCount, setFollowersCount] = useState('');
   
-  const connectAccountMutation = useConnectSocialAccount();
+  const { initiateOAuthFlow, isLoading } = useOAuth();
   const { toast } = useToast();
 
   const platforms = [
@@ -33,45 +27,22 @@ const ConnectSocialAccount: React.FC<ConnectSocialAccountProps> = ({ onSuccess }
     { value: 'telegram', label: 'Telegram' },
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!platform || !accountName || !username) {
+  const handleConnect = async () => {
+    if (!platform) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
+        title: "Select Platform",
+        description: "Please select a platform to connect.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      await connectAccountMutation.mutateAsync({
-        platform,
-        account_name: accountName,
-        account_username: username,
-        followers_count: followersCount ? parseInt(followersCount) : undefined,
-      });
-
-      toast({
-        title: "Account Connected",
-        description: `Successfully connected your ${platform} account.`,
-      });
-
-      // Reset form
-      setPlatform('');
-      setAccountName('');
-      setUsername('');
-      setFollowersCount('');
+      await initiateOAuthFlow(platform);
       setIsOpen(false);
-      
       if (onSuccess) onSuccess();
     } catch (error) {
-      toast({
-        title: "Connection Failed",
-        description: "Failed to connect your account. Please try again.",
-        variant: "destructive",
-      });
+      // Error handling is done in the hook
     }
   };
 
@@ -87,9 +58,8 @@ const ConnectSocialAccount: React.FC<ConnectSocialAccountProps> = ({ onSuccess }
         <DialogHeader>
           <DialogTitle>Connect Social Media Account</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="platform">Platform</Label>
             <Select value={platform} onValueChange={setPlatform}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a platform" />
@@ -107,55 +77,39 @@ const ConnectSocialAccount: React.FC<ConnectSocialAccountProps> = ({ onSuccess }
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="account-name">Account Name</Label>
-            <Input
-              id="account-name"
-              value={accountName}
-              onChange={(e) => setAccountName(e.target.value)}
-              placeholder="e.g., Your Brand Name"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g., yourbrand (without @)"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="followers">Followers Count (Optional)</Label>
-            <Input
-              id="followers"
-              type="number"
-              value={followersCount}
-              onChange={(e) => setFollowersCount(e.target.value)}
-              placeholder="e.g., 1500"
-            />
-          </div>
-
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Note:</strong> This is a demo connection. In a real application, 
-              you would connect through OAuth with the social media platform.
-            </p>
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="flex items-start gap-3">
+              <ExternalLink className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-blue-800">
+                  Real OAuth Authentication
+                </p>
+                <p className="text-sm text-blue-700 mt-1">
+                  You'll be redirected to {platform || 'the selected platform'} to authorize access to your account. 
+                  This is a secure OAuth flow that allows you to connect your real social media accounts.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={connectAccountMutation.isPending}>
-              {connectAccountMutation.isPending ? 'Connecting...' : 'Connect Account'}
+            <Button 
+              onClick={handleConnect} 
+              disabled={!platform || isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading ? 'Connecting...' : (
+                <>
+                  <ExternalLink className="h-4 w-4" />
+                  Connect with {platform ? platforms.find(p => p.value === platform)?.label : 'OAuth'}
+                </>
+              )}
             </Button>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

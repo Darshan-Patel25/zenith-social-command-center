@@ -19,6 +19,7 @@ import Settings from "@/pages/Settings";
 import Auth from "@/pages/Auth";
 import NotFound from "./pages/NotFound";
 import Content from "./pages/Content";
+import OAuthCallback from "./components/OAuthCallback";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -39,6 +40,11 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/oauth/callback" element={
+                <ProtectedRoute>
+                  <OAuthCallback />
+                </ProtectedRoute>
+              } />
               <Route path="/" element={
                 <ProtectedRoute>
                   <Layout><Dashboard /></Layout>

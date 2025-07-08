@@ -191,3 +191,27 @@ export const useConnectSocialAccount = () => {
     },
   });
 };
+
+export const useDisconnectSocialAccount = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (accountId: string) => {
+      const { error } = await supabase
+        .from('social_accounts')
+        .update({
+          access_token: null,
+          refresh_token: null,
+          token_expires_at: null,
+          is_connected: false,
+          last_synced_at: new Date().toISOString()
+        })
+        .eq('id', accountId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['social_accounts'] });
+    },
+  });
+};
