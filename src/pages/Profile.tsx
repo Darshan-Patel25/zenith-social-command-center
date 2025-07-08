@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Bell, CreditCard, Store, GraduationCap, UserCog, Users, Send, Contact, Check } from 'lucide-react';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
-import { useSocialAccounts, useConnectSocialAccount } from '@/hooks/useSupabaseData';
+import { useSocialAccounts, useDisconnectSocialAccount } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOAuth } from '@/hooks/useOAuth';
 import ConnectSocialAccount from '@/components/ConnectSocialAccount';
 import { useToast } from '@/hooks/use-toast';
 
@@ -23,6 +24,33 @@ const Profile: React.FC = () => {
   
   const { user } = useAuth();
   const { data: socialAccounts = [], isLoading } = useSocialAccounts();
+  const { initiateOAuthFlow } = useOAuth();
+  const disconnectMutation = useDisconnectSocialAccount();
+  const { toast } = useToast();
+
+  const handleReconnect = async (platform: string) => {
+    try {
+      await initiateOAuthFlow(platform);
+    } catch (error) {
+      // Error handling is done in the hook
+    }
+  };
+
+  const handleDisconnect = async (accountId: string) => {
+    try {
+      await disconnectMutation.mutateAsync(accountId);
+      toast({
+        title: "Account Disconnected",
+        description: "Your account has been disconnected successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to disconnect account. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     if (user?.email) {
@@ -277,46 +305,77 @@ const Profile: React.FC = () => {
                                  </div>
                                </div>
                              </td>
-                             <td className="px-4 py-3">
-                               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                 account.is_connected 
-                                   ? 'bg-green-100 text-green-800' 
-                                   : 'bg-red-100 text-red-800'
-                               }`}>
-                                 {account.is_connected ? 'Connected' : 'Disconnected'}
-                               </span>
-                             </td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center space-x-2">
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                    account.is_connected 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    {account.is_connected ? 'Connected' : 'Disconnected'}
+                                  </span>
+                                  {account.access_token && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                      OAuth
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
                              <td className="px-4 py-3 text-sm">(GMT+05:30) Asia/Calcutta</td>
                              <td className="px-4 py-3 text-sm">Direct posting</td>
-                             <td className="px-4 py-3">
-                               <div className="flex items-center space-x-2">
-                                 <Button variant="outline" size="sm">
-                                   Reconnect
-                                 </Button>
-                                 <Button variant="ghost" size="sm">
-                                   <Contact className="h-4 w-4" />
-                                 </Button>
-                                 <Button variant="ghost" size="sm">
-                                   <svg
-                                     width="15"
-                                     height="15"
-                                     viewBox="0 0 15 15"
-                                     fill="none"
-                                     xmlns="http://www.w3.org/2000/svg"
-                                   >
-                                     <path
-                                       d="M7.5 2C7.77614 2 8 2.22386 8 2.5V12.5C8 12.7761 7.77614 13 7.5 13C7.22386 13 7 12.7761 7 12.5V2.5C7 2.22386 7.22386 2 7.5 2Z"
-                                       fill="currentColor"
-                                     />
-                                     <path
-                                       d="M2.5 7C2.22386 7 2 7.22386 2 7.5C2 7.77614 2.22386 8 2.5 8H12.5C12.7761 8 13 7.77614 13 7.5C13 7.22386 12.7761 7 12.5 7H2.5Z"
-                                       fill="currentColor"
-                                     />
-                                   </svg>
-                                 </Button>
-                                 <Switch checked={account.is_connected} />
-                               </div>
-                             </td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center space-x-2">
+                                  {account.is_connected ? (
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => handleDisconnect(account.id)}
+                                      disabled={disconnectMutation.isPending}
+                                    >
+                                      {disconnectMutation.isPending ? 'Disconnecting...' : 'Disconnect'}
+                                    </Button>
+                                  ) : (
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => handleReconnect(account.platform)}
+                                    >
+                                      Reconnect
+                                    </Button>
+                                  )}
+                                  <Button variant="ghost" size="sm">
+                                    <Contact className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm">
+                                    <svg
+                                      width="15"
+                                      height="15"
+                                      viewBox="0 0 15 15"
+                                      fill="none"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M7.5 2C7.77614 2 8 2.22386 8 2.5V12.5C8 12.7761 7.77614 13 7.5 13C7.22386 13 7 12.7761 7 12.5V2.5C7 2.22386 7.22386 2 7.5 2Z"
+                                        fill="currentColor"
+                                      />
+                                      <path
+                                        d="M2.5 7C2.22386 7 2 7.22386 2 7.5C2 7.77614 2.22386 8 2.5 8H12.5C12.7761 8 13 7.77614 13 7.5C13 7.22386 12.7761 7 12.5 7H2.5Z"
+                                        fill="currentColor"
+                                      />
+                                    </svg>
+                                  </Button>
+                                  <Switch 
+                                    checked={account.is_connected} 
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        handleReconnect(account.platform);
+                                      } else {
+                                        handleDisconnect(account.id);
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              </td>
                            </tr>
                          ))
                        )}
