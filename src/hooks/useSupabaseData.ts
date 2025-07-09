@@ -215,3 +215,85 @@ export const useDisconnectSocialAccount = () => {
     },
   });
 };
+
+export const useUpdateAccountStatus = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
+  return useMutation({
+    mutationFn: async ({ accountId, isActive }: { accountId: string; isActive: boolean }) => {
+      if (!user) throw new Error('User not authenticated');
+      
+      const { data, error } = await supabase.rpc('update_social_account_status', {
+        account_id: accountId,
+        new_status: isActive,
+        user_id_param: user.id
+      });
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['social_accounts'] });
+    },
+  });
+};
+
+export const useAccountHealth = (accountId: string) => {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['account_health', accountId, user?.id],
+    queryFn: async () => {
+      if (!user || !accountId) return null;
+      
+      const { data, error } = await supabase.rpc('get_account_health', {
+        account_id: accountId,
+        user_id_param: user.id
+      });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user && !!accountId,
+    refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+  });
+};
+
+export const useRefreshAccountToken = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
+  return useMutation({
+    mutationFn: async (accountId: string) => {
+      if (!user) throw new Error('User not authenticated');
+      
+      // Get the account details
+      const { data: account, error: accountError } = await supabase
+        .from('social_accounts')
+        .select('platform, refresh_token')
+        .eq('id', accountId)
+        .eq('user_id', user.id)
+        .single();
+      
+      if (accountError) throw accountError;
+      
+      // Call the OAuth callback function to refresh the token
+      const { data, error } = await supabase.functions.invoke('oauth-callback', {
+        body: {
+          action: 'refresh',
+          accountId: accountId,
+          platform: account.platform,
+          refreshToken: account.refresh_token
+        }
+      });
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['social_accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['account_health'] });
+    },
+  });
+};

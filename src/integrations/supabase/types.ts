@@ -56,6 +56,7 @@ export type Database = {
           client_secret: string
           created_at: string
           id: string
+          is_active: boolean | null
           platform: string
           redirect_uri: string
           scopes: string[] | null
@@ -66,6 +67,7 @@ export type Database = {
           client_secret: string
           created_at?: string
           id?: string
+          is_active?: boolean | null
           platform: string
           redirect_uri: string
           scopes?: string[] | null
@@ -76,6 +78,7 @@ export type Database = {
           client_secret?: string
           created_at?: string
           id?: string
+          is_active?: boolean | null
           platform?: string
           redirect_uri?: string
           scopes?: string[] | null
@@ -143,52 +146,67 @@ export type Database = {
       social_accounts: {
         Row: {
           access_token: string | null
+          access_token_encrypted: string | null
           account_name: string
           account_username: string
           created_at: string
           followers_count: number | null
           id: string
+          is_active: boolean | null
           is_connected: boolean | null
           last_synced_at: string | null
+          oauth_state: string | null
           oauth_user_id: string | null
           oauth_username: string | null
           platform: string
           refresh_token: string | null
+          refresh_token_encrypted: string | null
           token_expires_at: string | null
+          token_salt: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           access_token?: string | null
+          access_token_encrypted?: string | null
           account_name: string
           account_username: string
           created_at?: string
           followers_count?: number | null
           id?: string
+          is_active?: boolean | null
           is_connected?: boolean | null
           last_synced_at?: string | null
+          oauth_state?: string | null
           oauth_user_id?: string | null
           oauth_username?: string | null
           platform: string
           refresh_token?: string | null
+          refresh_token_encrypted?: string | null
           token_expires_at?: string | null
+          token_salt?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           access_token?: string | null
+          access_token_encrypted?: string | null
           account_name?: string
           account_username?: string
           created_at?: string
           followers_count?: number | null
           id?: string
+          is_active?: boolean | null
           is_connected?: boolean | null
           last_synced_at?: string | null
+          oauth_state?: string | null
           oauth_user_id?: string | null
           oauth_username?: string | null
           platform?: string
           refresh_token?: string | null
+          refresh_token_encrypted?: string | null
           token_expires_at?: string | null
+          token_salt?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -199,8 +217,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_account_health: {
+        Args: { account_id: string; user_id_param: string }
+        Returns: Json
+      }
       initiate_oauth_flow: {
         Args: { platform_name: string; user_id_param: string }
+        Returns: Json
+      }
+      update_social_account_status: {
+        Args: { account_id: string; new_status: boolean; user_id_param: string }
         Returns: Json
       }
     }
