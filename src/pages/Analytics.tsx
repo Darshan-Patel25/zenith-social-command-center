@@ -21,7 +21,7 @@ import MetricCard from '@/components/analytics/MetricCard';
 import AnalyticsChart from '@/components/analytics/AnalyticsChart';
 import EngagementTable from '@/components/analytics/EngagementTable';
 import PostPerformance from '@/components/analytics/PostPerformance';
-import { useAnalyticsMetrics, usePosts, useSocialAccounts, useUpdateAccountStatus } from '@/hooks/useSupabaseData';
+import { useAnalyticsMetrics, usePosts, useSocialAccounts } from '@/hooks/useSupabaseData';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import {
   ChevronDown,
@@ -29,10 +29,7 @@ import {
   Share,
   FileBarChart,
   BarChart3,
-  Lightbulb,
-  CheckCircle,
-  XCircle,
-  AlertTriangle
+  Lightbulb
 } from 'lucide-react';
 import {
   LineChart,
@@ -148,77 +145,17 @@ const Analytics: React.FC = () => {
   const { data: analyticsData = [], isLoading } = useAnalyticsMetrics(selectedPlatform);
   const { data: posts = [] } = usePosts();
   const { data: socialAccounts = [] } = useSocialAccounts();
-  const updateStatusMutation = useUpdateAccountStatus();
   
-  // Filter to only show analytics for active and connected accounts
-  const activeAccounts = socialAccounts.filter(account => 
-    account.is_active !== false && account.is_connected
-  );
-  
-  // Update platform options to only show connected platforms
-  const connectedPlatforms = activeAccounts.map(account => account.platform);
-  const availablePlatformOptions = platformOptions.filter(platform => 
-    connectedPlatforms.includes(platform)
-  );
-  
-  // Auto-select first available platform if current selection is not connected
-  React.useEffect(() => {
-    if (!connectedPlatforms.includes(selectedPlatform) && availablePlatformOptions.length > 0) {
-      setSelectedPlatform(availablePlatformOptions[0]);
-    }
-  }, [connectedPlatforms, selectedPlatform, availablePlatformOptions]);
-  
-  const getAccountHealth = (platform: string) => {
-    const account = socialAccounts.find(acc => acc.platform === platform);
-    if (!account) return 'not_connected';
-    
-    const now = new Date();
-    const tokenExpiry = account.token_expires_at ? new Date(account.token_expires_at) : null;
-    const lastSync = account.last_synced_at ? new Date(account.last_synced_at) : null;
-    const hoursSinceSync = lastSync ? (now.getTime() - lastSync.getTime()) / (1000 * 60 * 60) : null;
-
-    if (!account.access_token) return 'no_token';
-    if (!account.is_connected) return 'disconnected';
-    if (account.is_active === false) return 'inactive';
-    if (tokenExpiry && tokenExpiry < now) return 'token_expired';
-    if (hoursSinceSync && hoursSinceSync > 24) return 'sync_needed';
-    return 'healthy';
-  };
-  
-  const getHealthStatusIcon = (platform: string) => {
-    const health = getAccountHealth(platform);
-    switch (health) {
-      case 'healthy':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'sync_needed':
-      case 'token_expired':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'inactive':
-      case 'disconnected':
-      case 'no_token':
-      case 'not_connected':
-      default:
-        return <XCircle className="h-4 w-4 text-red-500" />;
-    }
-  };
-  
-  // Calculate real metrics from data - only from active accounts
-  const activePlatformPosts = posts.filter(post => {
-    const account = socialAccounts.find(acc => acc.platform === post.platform);
-    return post.platform === selectedPlatform && account?.is_active !== false && account?.is_connected;
-  });
-  const activePlatformMetrics = analyticsData.filter(metric => {
-    const account = socialAccounts.find(acc => acc.platform === metric.platform);
-    return metric.platform === selectedPlatform && account?.is_active !== false && account?.is_connected;
-  });
+  // Calculate real metrics from data
+  const platformPosts = posts.filter(post => post.platform === selectedPlatform);
+  const platformMetrics = analyticsData.filter(metric => metric.platform === selectedPlatform);
   
   const realMetrics = {
-    connections: activeAccounts.filter(account => account.platform === selectedPlatform)
-      .reduce((sum, account) => sum + (account.followers_count || 0), 0),
-    posts: activePlatformPosts.length,
-    comments: activePlatformPosts.reduce((sum, post) => sum + (post.comments_count || 0), 0),
-    reactions: activePlatformPosts.reduce((sum, post) => sum + (post.likes_count || 0), 0),
-    engagement: activePlatformMetrics.reduce((sum, metric) => sum + (metric.engagement_count || 0), 0),
+    connections: socialAccounts.reduce((sum, account) => sum + (account.followers_count || 0), 0),
+    posts: platformPosts.length,
+    comments: platformPosts.reduce((sum, post) => sum + (post.comments_count || 0), 0),
+    reactions: platformPosts.reduce((sum, post) => sum + (post.likes_count || 0), 0),
+    engagement: platformMetrics.reduce((sum, metric) => sum + (metric.engagement_count || 0), 0),
   };
   
   // Generate real performance data from posts
@@ -230,7 +167,7 @@ const Analytics: React.FC = () => {
     });
     
     return last7Days.map(date => {
-      const dayPosts = activePlatformPosts.filter(post => {
+      const dayPosts = platformPosts.filter(post => {
         const postDate = new Date(post.created_at);
         return postDate.toDateString() === date.toDateString();
       });
@@ -246,13 +183,10 @@ const Analytics: React.FC = () => {
   
   const realPerformanceData = generateRealPerformanceData();
   
-  // Generate real platform comparison data - only active accounts
+  // Generate real platform comparison data
   const realPlatformData = ['instagram', 'facebook', 'twitter', 'linkedin'].map(platform => {
-    const platformSpecificPosts = posts.filter(post => {
-      const account = socialAccounts.find(acc => acc.platform === post.platform);
-      return post.platform === platform && account?.is_active !== false && account?.is_connected;
-    });
-    const platformAccounts = activeAccounts.filter(account => account.platform === platform);
+    const platformSpecificPosts = posts.filter(post => post.platform === platform);
+    const platformAccounts = socialAccounts.filter(account => account.platform === platform);
     
     return {
       platform: platform.charAt(0).toUpperCase() + platform.slice(1),
@@ -284,18 +218,6 @@ const Analytics: React.FC = () => {
       </div>
     );
   }
-
-  if (availablePlatformOptions.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <AlertTriangle className="h-12 w-12 text-yellow-500" />
-        <div className="text-center">
-          <h3 className="text-lg font-semibold">No Active Accounts</h3>
-          <p className="text-muted-foreground">Connect and activate social accounts to view analytics</p>
-        </div>
-      </div>
-    );
-  }
   
   return (
     <>
@@ -311,7 +233,6 @@ const Analytics: React.FC = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
           <div className="flex items-center gap-2">
             <h1 className="text-lg sm:text-xl font-semibold">{getPlatformDisplayName(selectedPlatform)} Analytics</h1>
-            {getHealthStatusIcon(selectedPlatform)}
             <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
               <ChevronDown className="h-4 w-4" />
             </Button>
@@ -323,21 +244,14 @@ const Analytics: React.FC = () => {
                 <SelectValue placeholder="Select Platform" />
               </SelectTrigger>
               <SelectContent>
-                {availablePlatformOptions.length > 0 ? (
-                  availablePlatformOptions.map(platform => (
-                    <SelectItem key={platform} value={platform}>
-                      <div className="flex items-center gap-2">
-                        <SocialIcon platform={platform} size={16} />
-                        <span className="capitalize">{platform}</span>
-                        {getHealthStatusIcon(platform)}
-                      </div>
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="none" disabled>
-                    No active accounts connected
+                {platformOptions.map(platform => (
+                  <SelectItem key={platform} value={platform}>
+                    <div className="flex items-center gap-2">
+                      <SocialIcon platform={platform} size={16} />
+                      <span className="capitalize">{platform}</span>
+                    </div>
                   </SelectItem>
-                )}
+                ))}
               </SelectContent>
             </Select>
             
@@ -493,12 +407,12 @@ const Analytics: React.FC = () => {
                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
                 <MetricCard 
                   title="Avg Engagement" 
-                  value={activePlatformPosts.length > 0 ? (realMetrics.reactions / activePlatformPosts.length).toFixed(1) : "0"} 
+                  value={platformPosts.length > 0 ? (realMetrics.reactions / platformPosts.length).toFixed(1) : "0"} 
                   trend={{ value: "+2.4%", period: "last 30 days" }}
                 />
                 <MetricCard 
                   title="Top Post Reach" 
-                  value={Math.max(...activePlatformPosts.map(p => p.reach_count || 0), 0).toString()}
+                  value={Math.max(...platformPosts.map(p => p.reach_count || 0), 0).toString()}
                   trend={{ value: "+18%", period: "last 30 days" }}
                 />
                 <MetricCard 
@@ -508,7 +422,7 @@ const Analytics: React.FC = () => {
                 />
                 <MetricCard 
                   title="Total Shares" 
-                  value={activePlatformPosts.reduce((sum, post) => sum + (post.shares_count || 0), 0).toString()}
+                  value={platformPosts.reduce((sum, post) => sum + (post.shares_count || 0), 0).toString()}
                   trend={{ value: "+0.8%", period: "last 30 days" }}
                 />
               </div>

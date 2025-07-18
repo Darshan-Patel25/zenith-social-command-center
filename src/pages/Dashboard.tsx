@@ -2,28 +2,23 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Bell, Plus, Calendar, Image, BarChart3, RefreshCw, Clock, TrendingUp, Users, MessageCircle, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Bell, Plus, Calendar, Image, BarChart3, RefreshCw, Clock, TrendingUp, Users, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSocialAccounts, usePosts, useAnalyticsMetrics, useUpdateAccountStatus, useRefreshAccountToken } from '@/hooks/useSupabaseData';
+import { useSocialAccounts, usePosts, useAnalyticsMetrics } from '@/hooks/useSupabaseData';
 import SocialIcon from '@/components/common/SocialIcon';
 import { SocialPlatform } from '@/types';
 import { useToast } from '@/hooks/use-toast';
-import { Switch } from '@/components/ui/switch';
-import ConnectSocialAccount from '@/components/ConnectSocialAccount';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { data: socialAccounts = [] } = useSocialAccounts();
   const { data: posts = [] } = usePosts();
   const { data: analyticsData = [] } = useAnalyticsMetrics();
-  const updateStatusMutation = useUpdateAccountStatus();
-  const refreshTokenMutation = useRefreshAccountToken();
   const { toast } = useToast();
 
-  // Calculate analytics summary - only count active and connected accounts
-  const activeAccounts = socialAccounts.filter(account => account.is_active !== false && account.is_connected);
-  const totalFollowers = activeAccounts.reduce((sum, account) => sum + (account.followers_count || 0), 0);
+  // Calculate analytics summary
+  const totalFollowers = socialAccounts.reduce((sum, account) => sum + (account.followers_count || 0), 0);
   const publishedPosts = posts.filter(post => post.status === 'published').length;
   const scheduledPosts = posts.filter(post => post.status === 'scheduled').length;
   const totalEngagement = posts.reduce((sum, post) => sum + (post.likes_count || 0) + (post.comments_count || 0) + (post.shares_count || 0), 0);
@@ -33,57 +28,11 @@ const Dashboard: React.FC = () => {
   const availablePlatforms = ['facebook', 'twitter', 'instagram', 'linkedin', 'telegram']
     .filter(platform => !connectedPlatforms.includes(platform));
 
-  const handleToggleActive = async (accountId: string, isActive: boolean) => {
-    try {
-      await updateStatusMutation.mutateAsync({ accountId, isActive });
-      toast({
-        title: isActive ? "Account Activated" : "Account Deactivated",
-        description: `Your account has been ${isActive ? 'activated' : 'deactivated'} successfully.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update account status. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRefreshToken = async (accountId: string) => {
-    try {
-      await refreshTokenMutation.mutateAsync(accountId);
-      toast({
-        title: "Token Refreshed",
-        description: "Your account token has been refreshed successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to refresh token. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const getHealthStatusIcon = (account: any) => {
-    const now = new Date();
-    const tokenExpiry = account.token_expires_at ? new Date(account.token_expires_at) : null;
-    const lastSync = account.last_synced_at ? new Date(account.last_synced_at) : null;
-    const hoursSinceSync = lastSync ? (now.getTime() - lastSync.getTime()) / (1000 * 60 * 60) : null;
-
-    if (!account.access_token) {
-      return <span title="No access token"><XCircle className="h-3 w-3 text-red-500" /></span>;
-    }
-    if (!account.is_connected) {
-      return <span title="Disconnected"><XCircle className="h-3 w-3 text-red-500" /></span>;
-    }
-    if (tokenExpiry && tokenExpiry < now) {
-      return <span title="Token expired"><AlertTriangle className="h-3 w-3 text-yellow-500" /></span>;
-    }
-    if (hoursSinceSync && hoursSinceSync > 24) {
-      return <span title="Sync needed"><AlertTriangle className="h-3 w-3 text-yellow-500" /></span>;
-    }
-    return <span title="Healthy"><CheckCircle className="h-3 w-3 text-green-500" /></span>;
+  const handleConnectAccount = () => {
+    toast({
+      title: "Connect Account",
+      description: "Account connection feature will be available soon. For now, you can add accounts via the Profile page.",
+    });
   };
 
   return (
@@ -151,82 +100,59 @@ const Dashboard: React.FC = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Connected Accounts</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {activeAccounts.length} active of {socialAccounts.length} connected accounts
-            </p>
+            <p className="text-sm text-muted-foreground">Manage your social media accounts</p>
           </div>
-          <ConnectSocialAccount />
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {socialAccounts.map((account) => (
-              <div key={account.id} className={`relative p-4 border rounded-lg transition-all ${
-                account.is_active === false ? 'opacity-50 bg-gray-50' : ''
-              }`}>
-                <div className="flex items-start justify-between mb-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    account.platform === 'twitter' ? 'bg-blue-500' :
-                    account.platform === 'facebook' ? 'bg-blue-600' :
-                    account.platform === 'instagram' ? 'bg-pink-500' :
-                    account.platform === 'linkedin' ? 'bg-blue-600' :
-                    account.platform === 'telegram' ? 'bg-sky-500' : 'bg-gray-400'
-                  }`}>
-                    <SocialIcon platform={account.platform as SocialPlatform} size={20} className="text-white" />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {getHealthStatusIcon(account)}
-                    <Switch 
-                      checked={account.is_active !== false} 
-                      onCheckedChange={(checked) => handleToggleActive(account.id, checked)}
-                      disabled={updateStatusMutation.isPending}
-                      className="scale-75"
-                    />
-                  </div>
+              <div key={account.id} className="flex flex-col items-center p-4 border rounded-lg">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                  account.platform === 'twitter' ? 'bg-blue-500' :
+                  account.platform === 'facebook' ? 'bg-blue-600' :
+                  account.platform === 'instagram' ? 'bg-pink-500' :
+                  account.platform === 'linkedin' ? 'bg-blue-600' :
+                  account.platform === 'telegram' ? 'bg-sky-500' : 'bg-gray-400'
+                }`}>
+                  <SocialIcon platform={account.platform as SocialPlatform} size={24} className="text-white" />
                 </div>
-                <p className="font-medium text-sm truncate">{account.account_name}</p>
-                <p className="text-xs text-gray-500 truncate">@{account.account_username}</p>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center space-x-2">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      account.is_connected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {account.is_connected ? 'Connected' : 'Disconnected'}
-                    </span>
-                    {account.is_active !== false && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Active
-                      </span>
-                    )}
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => handleRefreshToken(account.id)}
-                    disabled={refreshTokenMutation.isPending}
-                    className="h-6 w-6 p-0"
-                  >
-                    <RefreshCw className={`h-3 w-3 ${refreshTokenMutation.isPending ? 'animate-spin' : ''}`} />
-                  </Button>
-                </div>
+                <p className="font-medium text-sm text-center truncate w-full">{account.account_name}</p>
+                <p className="text-xs text-gray-500 truncate w-full text-center">@{account.account_username}</p>
+                <p className={`text-xs mt-1 ${account.is_connected ? 'text-green-600' : 'text-gray-500'}`}>
+                  {account.is_connected ? 'Connected' : 'Disconnected'}
+                </p>
                 {account.followers_count && (
-                  <p className="text-xs text-muted-foreground mt-1">{account.followers_count.toLocaleString()} followers</p>
+                  <p className="text-xs text-muted-foreground">{account.followers_count.toLocaleString()} followers</p>
                 )}
               </div>
             ))}
             
             {/* Show available platforms to connect */}
-            {availablePlatforms.slice(0, 2).map((platform) => (
+            {availablePlatforms.slice(0, 3).map((platform) => (
               <div 
                 key={platform} 
                 className="flex flex-col items-center p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+                onClick={handleConnectAccount}
               >
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                  <SocialIcon platform={platform as SocialPlatform} size={20} className="text-gray-400" />
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                  <SocialIcon platform={platform as SocialPlatform} size={24} className="text-gray-400" />
                 </div>
                 <p className="font-medium text-sm text-center">Connect {platform}</p>
                 <p className="text-xs text-muted-foreground mt-1">Not connected</p>
               </div>
             ))}
+            
+            {/* Add more accounts option */}
+            <div 
+              className="flex flex-col items-center p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+              onClick={handleConnectAccount}
+            >
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                <Plus className="h-6 w-6 text-gray-400" />
+              </div>
+              <p className="font-medium text-sm text-center">Add Account</p>
+              <p className="text-xs text-muted-foreground mt-1">Connect a new platform</p>
+            </div>
           </div>
         </CardContent>
       </Card>
