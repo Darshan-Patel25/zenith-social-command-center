@@ -21,14 +21,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const getTitle = (): string => {
     const path = location.pathname;
     
-    if (path === '/') return 'Dashboard';
-    if (path === '/create-post') return 'Create Post';
-    if (path === '/schedule') return 'Schedule Posts';
-    if (path === '/analytics') return 'Analytics';
-    if (path === '/engagement') return 'Engagement';
-    if (path === '/profile') return 'My Profile';
-    if (path === '/content') return 'Content';
-    if (path === '/settings') return 'Settings';
+    if (path === '/') return '';
+    if (path === '/create-post') return '';
+    if (path === '/schedule') return '';
+    if (path === '/analytics') return '';
+    if (path === '/engagement') return '';
+    if (path === '/profile') return '';
+    if (path === '/content') return '';
+    if (path === '/settings') return '';
     
     return 'Trendlyzer';
   };
@@ -44,12 +44,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             ? 'lg:ml-52' 
             : 'ml-16'
       }`}>
-        <div className="border-b bg-white flex items-center justify-between px-2 sm:px-4 h-12">
-          <h1 className="text-lg sm:text-xl font-bold pl-2 sm:pl-4">{getTitle()}</h1>
-          <UserMenu />
-        </div>
+      
         
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto pl-4 pr-4 pt-2">
           {children}
         </main>
       </div>
