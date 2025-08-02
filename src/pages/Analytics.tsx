@@ -21,6 +21,7 @@ import MetricCard from '@/components/analytics/MetricCard';
 import AnalyticsChart from '@/components/analytics/AnalyticsChart';
 import EngagementTable from '@/components/analytics/EngagementTable';
 import PostPerformance from '@/components/analytics/PostPerformance';
+import AIInsights from '@/components/analytics/AIInsights';
 import { useAnalyticsMetrics, usePosts, useSocialAccounts } from '@/hooks/useSupabaseData';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import {
@@ -484,6 +485,12 @@ const Analytics: React.FC = () => {
             <TabsContent value="insights" className="space-y-4 sm:space-y-6">
               <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Account Insights</h2>
               
+              {/* AI Insights Component */}
+              <AIInsights 
+                analyticsData={analyticsData}
+                postsData={posts}
+              />
+              
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <EngagementTable 
                   title="Content Performance" 
@@ -497,7 +504,7 @@ const Analytics: React.FC = () => {
                   />
                   
                   <Card className="p-3 sm:p-4">
-                    <h3 className="text-base sm:text-lg font-semibold mb-4">Recommended Actions</h3>
+                    <h3 className="text-base sm:text-lg font-semibold mb-4">Traditional Recommendations</h3>
                     <ul className="space-y-2">
                       <li className="flex items-start">
                         <div className="bg-blue-100 p-1 rounded mr-2 flex-shrink-0">
