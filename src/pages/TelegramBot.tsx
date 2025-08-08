@@ -6,8 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, Users, Bell, Send, Settings, MessageSquare, Zap } from 'lucide-react';
+import { Bot, Users, Bell, Send, Settings, MessageSquare, Zap, Search } from 'lucide-react';
 import { Textarea } from '@/components/content/Textarea';
+import { usePosts, useSocialAccounts } from '@/hooks/useSupabaseData';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 // Sample telegram bot data
 const botData = {
@@ -33,6 +36,16 @@ const TelegramBot: React.FC = () => {
   const [newResponse, setNewResponse] = useState('');
   const [autoRespond, setAutoRespond] = useState(true);
   const [notifyNewSubscribers, setNotifyNewSubscribers] = useState(true);
+  
+  // Dynamic data from Supabase
+  const { data: posts = [], isLoading: postsLoading } = usePosts();
+  const { data: socialAccounts = [], isLoading: accountsLoading } = useSocialAccounts();
+  const { toast } = useToast();
+  
+  // Calculate real-time stats
+  const telegramAccount = socialAccounts.find(account => account.platform === 'telegram');
+  const realFollowers = telegramAccount?.followers_count || botData.subscribers;
+  const publishedPosts = posts.filter(p => p.status === 'published' && p.platform === 'telegram').length;
   
   const handleAddCommand = () => {
     if (newCommand && newDescription && newResponse) {
@@ -156,29 +169,41 @@ const TelegramBot: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Total Subscribers</p>
-                    <div className="flex items-baseline">
-                      <h3 className="text-2xl font-bold">{botData.subscribers}</h3>
-                      <span className="ml-2 text-xs text-green-600">+12 this week</span>
+                  {accountsLoading ? (
+                    <div className="animate-pulse space-y-6">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                     </div>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Messages Sent</p>
-                    <div className="flex items-baseline">
-                      <h3 className="text-2xl font-bold">1,247</h3>
-                      <span className="ml-2 text-xs text-green-600">+89 this week</span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Commands Used</p>
-                    <div className="flex items-baseline">
-                      <h3 className="text-2xl font-bold">358</h3>
-                      <span className="ml-2 text-xs text-green-600">+28 this week</span>
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Total Subscribers</p>
+                        <div className="flex items-baseline">
+                          <h3 className="text-2xl font-bold">{realFollowers.toLocaleString()}</h3>
+                          <span className="ml-2 text-xs text-green-600">
+                            {telegramAccount ? 'Real-time' : 'Sample data'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Published Posts</p>
+                        <div className="flex items-baseline">
+                          <h3 className="text-2xl font-bold">{publishedPosts}</h3>
+                          <span className="ml-2 text-xs text-blue-600">Via Telegram</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Commands Active</p>
+                        <div className="flex items-baseline">
+                          <h3 className="text-2xl font-bold">{commands.length}</h3>
+                          <span className="ml-2 text-xs text-purple-600">Ready to use</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
                   
                   <Button variant="outline" className="w-full">
                     View Detailed Stats
@@ -584,11 +609,5 @@ const TelegramBot: React.FC = () => {
   );
 };
 
-// Helper component for search icon
-const Search = ({ className, ...props }: React.ComponentProps<typeof Search>) => {
-  return (
-    <Search className={className} {...props} />
-  );
-};
 
 export default TelegramBot;
