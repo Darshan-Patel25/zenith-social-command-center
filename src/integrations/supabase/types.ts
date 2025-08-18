@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -220,6 +220,15 @@ export type Database = {
       get_account_health: {
         Args: { account_id: string; user_id_param: string }
         Returns: Json
+      }
+      get_oauth_config: {
+        Args: { platform_name: string }
+        Returns: {
+          client_id: string
+          client_secret: string
+          redirect_uri: string
+          scopes: string[]
+        }[]
       }
       initiate_oauth_flow: {
         Args: { platform_name: string; user_id_param: string }
