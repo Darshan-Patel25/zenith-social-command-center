@@ -30,9 +30,18 @@ const Auth: React.FC = () => {
     const { error } = await signIn(email, password);
     
     if (error) {
+      let errorMessage = error.message;
+      
+      // Provide more helpful error messages
+      if (error.message.includes("Invalid login credentials")) {
+        errorMessage = "Invalid email or password. If you just signed up, please check your email to confirm your account first.";
+      } else if (error.message.includes("Email not confirmed")) {
+        errorMessage = "Please check your email and click the confirmation link before signing in.";
+      }
+      
       toast({
         title: "Error signing in",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } else {
@@ -53,16 +62,27 @@ const Auth: React.FC = () => {
     const { error } = await signUp(email, password);
     
     if (error) {
+      let errorMessage = error.message;
+      
+      // Handle specific error cases
+      if (error.message.includes("User already registered")) {
+        errorMessage = "This email is already registered. Please sign in instead or use a different email.";
+      }
+      
       toast({
         title: "Error signing up",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } else {
       toast({
         title: "Account created!",
-        description: "Please check your email to confirm your account.",
+        description: "Check your email and click the confirmation link to activate your account. Then you can sign in.",
+        duration: 10000,
       });
+      // Clear form
+      setEmail('');
+      setPassword('');
     }
     
     setLoading(false);
@@ -80,7 +100,11 @@ const Auth: React.FC = () => {
           <CardHeader>
             <CardTitle>Authentication</CardTitle>
             <CardDescription>
-              Sign in to your account or create a new one
+              Sign in to your account or create a new one. 
+              <br />
+              <span className="text-xs text-muted-foreground mt-2 block">
+                Note: Email confirmation is required after signup before you can sign in.
+              </span>
             </CardDescription>
           </CardHeader>
           <CardContent>
