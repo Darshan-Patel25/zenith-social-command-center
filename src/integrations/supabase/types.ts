@@ -14,7 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analytics_metrics: {
+        Row: {
+          clicks: number | null
+          comments: number | null
+          created_at: string
+          engagements: number | null
+          followers: number | null
+          id: string
+          impressions: number | null
+          likes: number | null
+          metric_date: string
+          platform: string
+          reach: number | null
+          shares: number | null
+          social_account_id: string | null
+          user_id: string
+        }
+        Insert: {
+          clicks?: number | null
+          comments?: number | null
+          created_at?: string
+          engagements?: number | null
+          followers?: number | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          metric_date: string
+          platform: string
+          reach?: number | null
+          shares?: number | null
+          social_account_id?: string | null
+          user_id: string
+        }
+        Update: {
+          clicks?: number | null
+          comments?: number | null
+          created_at?: string
+          engagements?: number | null
+          followers?: number | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          metric_date?: string
+          platform?: string
+          reach?: number | null
+          shares?: number | null
+          social_account_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_metrics_social_account_id_fkey"
+            columns: ["social_account_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          content: string
+          created_at: string
+          files: string[] | null
+          id: string
+          images: string[] | null
+          platform: string
+          published_date: string | null
+          scheduled_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          videos: string[] | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          files?: string[] | null
+          id?: string
+          images?: string[] | null
+          platform: string
+          published_date?: string | null
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          videos?: string[] | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          files?: string[] | null
+          id?: string
+          images?: string[] | null
+          platform?: string
+          published_date?: string | null
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          videos?: string[] | null
+        }
+        Relationships: []
+      }
+      social_accounts: {
+        Row: {
+          access_token: string | null
+          account_id: string | null
+          account_name: string
+          account_username: string | null
+          created_at: string
+          followers_count: number | null
+          id: string
+          is_connected: boolean | null
+          last_synced_at: string | null
+          platform: string
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          account_id?: string | null
+          account_name: string
+          account_username?: string | null
+          created_at?: string
+          followers_count?: number | null
+          id?: string
+          is_connected?: boolean | null
+          last_synced_at?: string | null
+          platform: string
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          account_id?: string | null
+          account_name?: string
+          account_username?: string | null
+          created_at?: string
+          followers_count?: number | null
+          id?: string
+          is_connected?: boolean | null
+          last_synced_at?: string | null
+          platform?: string
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
