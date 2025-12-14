@@ -6,22 +6,34 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const { signIn, signUp, user, resetPassword, updatePassword } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
+    // Check if this is a password recovery redirect
+    const type = searchParams.get('type');
+    if (type === 'recovery') {
+      setShowResetPassword(true);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (user && !showResetPassword) {
       navigate('/');
     }
-  }, [user, navigate]);
+  }, [user, navigate, showResetPassword]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +44,6 @@ const Auth: React.FC = () => {
     if (error) {
       let errorMessage = error.message;
       
-      // Provide more helpful error messages
       if (error.message.includes("Invalid login credentials")) {
         errorMessage = "Invalid email or password. If you just signed up, please check your email to confirm your account first.";
       } else if (error.message.includes("Email not confirmed")) {
@@ -64,7 +75,6 @@ const Auth: React.FC = () => {
     if (error) {
       let errorMessage = error.message;
       
-      // Handle specific error cases
       if (error.message.includes("User already registered")) {
         errorMessage = "This email is already registered. Please sign in instead or use a different email.";
       }
@@ -77,10 +87,9 @@ const Auth: React.FC = () => {
     } else {
       toast({
         title: "Account created!",
-        description: "Check your email and click the confirmation link to activate your account. Then you can sign in.",
-        duration: 10000,
+        description: "You can now sign in with your credentials.",
+        duration: 5000,
       });
-      // Clear form
       setEmail('');
       setPassword('');
     }
@@ -88,23 +97,195 @@ const Auth: React.FC = () => {
     setLoading(false);
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await resetPassword(email);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Check your email",
+        description: "We've sent you a password reset link. Click it to reset your password.",
+        duration: 10000,
+      });
+      setShowForgotPassword(false);
+      setEmail('');
+    }
+    
+    setLoading(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    const { error } = await updatePassword(password);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Password updated!",
+        description: "Your password has been successfully reset.",
+      });
+      setShowResetPassword(false);
+      setPassword('');
+      setConfirmPassword('');
+      navigate('/');
+    }
+    
+    setLoading(false);
+  };
+
+  // Reset Password Form (after clicking email link)
+  if (showResetPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-foreground">Trendlyzer</h2>
+            <p className="text-muted-foreground mt-2">Set your new password</p>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Reset Password</CardTitle>
+              <CardDescription>
+                Enter your new password below.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="Enter new password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Confirm new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Updating...' : 'Update Password'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Forgot Password Form
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-foreground">Trendlyzer</h2>
+            <p className="text-muted-foreground mt-2">Reset your password</p>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Forgot Password</CardTitle>
+              <CardDescription>
+                Enter your email address and we'll send you a link to reset your password.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email">Email</Label>
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Sending...' : 'Send Reset Link'}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  className="w-full"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setEmail('');
+                  }}
+                >
+                  Back to Sign In
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Trendlyzer</h2>
-          <p className="text-gray-600 mt-2">Social Media Analytics Platform</p>
+          <h2 className="text-3xl font-bold text-foreground">Trendlyzer</h2>
+          <p className="text-muted-foreground mt-2">Social Media Analytics Platform</p>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle>Authentication</CardTitle>
             <CardDescription>
-              Sign in to your account or create a new one. 
-              <br />
-              <span className="text-xs text-muted-foreground mt-2 block">
-                Note: Email confirmation is required after signup before you can sign in.
-              </span>
+              Sign in to your account or create a new one.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -140,6 +321,14 @@ const Auth: React.FC = () => {
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? 'Signing In...' : 'Sign In'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    className="w-full text-sm"
+                    onClick={() => setShowForgotPassword(true)}
+                  >
+                    Forgot your password?
                   </Button>
                 </form>
               </TabsContent>
